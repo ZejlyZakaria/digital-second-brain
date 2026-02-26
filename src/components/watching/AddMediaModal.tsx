@@ -76,6 +76,7 @@ export default function AddMediaModal({
     if (!user) return;
 
     const { data, error } = await supabase
+      .schema("watching")
       .from("media_items")
       .select("priority")
       .eq("user_id", user.id)
@@ -143,157 +144,6 @@ export default function AddMediaModal({
     },
     [defaultType],
   );
-
-  // const selectResult = async (result: any) => {
-  //   setSelectedItem(result);
-  //   setSearchQuery("");
-  //   setSearchResults([]);
-
-  //   try {
-  //     const isMovie = result.media_type === "movie" || defaultType === "film";
-
-  //     const endpoint = isMovie
-  //       ? `https://api.themoviedb.org/3/movie/${result.id}`
-  //       : `https://api.themoviedb.org/3/tv/${result.id}`;
-
-  //     const res = await fetch(
-  //       `${endpoint}?api_key=${process.env.NEXT_PUBLIC_TMDB_API_KEY}&language=fr-FR`,
-  //     );
-
-  //     const details = await res.json();
-
-  //     let runtimeMinutes: number | null = null;
-
-  //     if (isMovie) {
-  //       // Film → runtime direct
-  //       runtimeMinutes = details.runtime ?? null;
-  //     } else {
-  //       // Série / Anime → Logique plus robuste pour episode_run_time
-  //       if (
-  //         Array.isArray(details.episode_run_time) &&
-  //         details.episode_run_time.length > 0
-  //       ) {
-  //         // On calcule la moyenne des durées indiquées (souvent plus précis)
-  //         const sum = details.episode_run_time.reduce(
-  //           (a: number, b: number) => a + b,
-  //           0,
-  //         );
-  //         runtimeMinutes = Math.round(sum / details.episode_run_time.length);
-  //       } else if (details.last_episode_to_air?.runtime) {
-  //         // Secours : on prend la durée du dernier épisode diffusé
-  //         runtimeMinutes = details.last_episode_to_air.runtime;
-  //       } else {
-  //         runtimeMinutes = null;
-  //       }
-  //     }
-
-  //     setRuntime(runtimeMinutes);
-
-  //     // Pour les séries et animes
-  //     if (!isMovie) {
-  //       setSeasons(details.number_of_seasons ?? null);
-  //       setEpisodes(details.number_of_episodes ?? null);
-  //     }
-  //   } catch (err) {
-  //     console.error("Erreur détails TMDB:", err);
-  //     setRuntime(null);
-  //   }
-  // };
-
-  // const selectResult = async (result: any) => {
-  //   setSelectedItem(result);
-  //   setSearchQuery("");
-  //   setSearchResults([]);
-
-  //   try {
-  //     // 🔥 Détection du type
-  //     const mediaType =
-  //       result.media_type || (result.first_air_date ? "tv" : "movie");
-  //     const isMovie = mediaType === "movie";
-
-  //     const endpoint = isMovie
-  //       ? `https://api.themoviedb.org/3/movie/${result.id}?append_to_response=credits`
-  //       : `https://api.themoviedb.org/3/tv/${result.id}`;
-
-  //     const res = await fetch(
-  //       `${endpoint}&api_key=${process.env.NEXT_PUBLIC_TMDB_API_KEY}&language=fr-FR`,
-  //     );
-  //     const details = await res.json();
-
-  //     console.log("📦 TMDB DETAILS:", details);
-
-  //     // 🕒 Runtime
-  //     let runtimeMinutes: number | null = null;
-  //     if (isMovie) {
-  //       runtimeMinutes = details.runtime ?? null;
-  //     } else {
-  //       if (
-  //         Array.isArray(details.episode_run_time) &&
-  //         details.episode_run_time.length > 0
-  //       ) {
-  //         const sum = details.episode_run_time.reduce(
-  //           (a: number, b: number) => a + b,
-  //           0,
-  //         );
-  //         runtimeMinutes = Math.round(sum / details.episode_run_time.length);
-  //       } else if (details.last_episode_to_air?.runtime) {
-  //         runtimeMinutes = details.last_episode_to_air.runtime;
-  //       } else {
-  //         runtimeMinutes = null;
-  //       }
-  //     }
-  //     setRuntime(runtimeMinutes);
-
-  //     // 📺 Séries / Anime
-  //     if (!isMovie) {
-  //       setSeasons(details.number_of_seasons ?? null);
-  //       setEpisodes(details.number_of_episodes ?? null);
-  //     }
-
-  //     // 🎬 Directors, Studio et Status
-  //     if (isMovie) {
-  //       // Directors
-  //       const crew = details.credits?.crew ?? [];
-  //       const movieDirectors = crew
-  //         .filter((m: any) => m.job === "Director")
-  //         .map((d: any) => ({
-  //           name: d.name,
-  //           profile_url: d.profile_path
-  //             ? `https://image.tmdb.org/t/p/w200${d.profile_path}`
-  //             : null,
-  //         }));
-  //       setDirectors(movieDirectors.length ? movieDirectors : null);
-
-  //       // Studio
-  //       const company = details.production_companies?.[0]?.name ?? null;
-  //       setStudio(company);
-
-  //       // Status
-  //       setStatus(details.status?.toLowerCase() ?? null);
-  //     } else {
-  //       // Pour séries/animes
-  //       setDirectors(null); // optionnel : tu pourrais récupérer les showrunners si tu veux
-  //       const networkName = details.networks?.[0]?.name ?? null;
-  //       setStudio(networkName);
-
-  //       const tvStatus = details.status?.toLowerCase() ?? null;
-  //       setStatus(tvStatus === "ended" ? "ended" : "ongoing");
-  //     }
-
-  //     console.log("✅ Runtime:", runtimeMinutes);
-  //     console.log("✅ Directors:", directors);
-  //     console.log("✅ Studio:", studio);
-  //     console.log("✅ Status:", status);
-  //   } catch (err) {
-  //     console.error("❌ Erreur détails TMDB:", err);
-  //     setRuntime(null);
-  //     setSeasons(null);
-  //     setEpisodes(null);
-  //     setDirectors(null);
-  //     setStudio(null);
-  //     setStatus(null);
-  //   }
-  // };
 
   const selectResult = async (result: any) => {
     setSelectedItem(result);
@@ -432,49 +282,6 @@ export default function AddMediaModal({
         posterUrl = urlData.publicUrl;
       }
 
-      // const insertData = {
-      //   user_id: user.id,
-      //   type: defaultType,
-      //   title: selectedItem.title || selectedItem.name,
-      //   original_title:
-      //     selectedItem.original_title || selectedItem.original_name,
-      //   description: selectedItem.overview,
-      //   poster_url: posterUrl,
-      //   backdrop_url: selectedItem.backdrop_path
-      //     ? `https://image.tmdb.org/t/p/original${selectedItem.backdrop_path}`
-      //     : null,
-      //   year:
-      //     new Date(
-      //       selectedItem.release_date || selectedItem.first_air_date,
-      //     ).getFullYear() || null,
-      //   runtime: runtime,
-      //   rating: selectedItem.vote_average,
-
-      //   // Champs obligatoires selon contexte
-      //   user_rating: listContext === "wantToWatch" ? null : userRating,
-      //   watched: listContext !== "wantToWatch",
-      //   want_to_watch: listContext === "wantToWatch",
-      //   favorite: listContext === "topTen" ? true : favorite,
-
-      //   // Priority (Top 10 seulement)
-      //   priority: listContext === "topTen" ? priority : null,
-
-      //   // Champs séries / animes
-      //   seasons:
-      //     defaultType === "serie" || defaultType === "anime" ? seasons : null,
-      //   episodes:
-      //     defaultType === "serie" || defaultType === "anime" ? episodes : null,
-      //   // current_episode:
-      //   //   defaultType === "serie" || defaultType === "anime"
-      //   //     ? currentEpisode
-      //   //     : null,
-
-      //   tmdb_id: selectedItem.id,
-      //   tags: mapTmdbGenres(selectedItem.genre_ids),
-      //   notes,
-      //   watched_at:
-      //     listContext === "recentlyWatched" ? new Date().toISOString() : null,
-      // };
       const insertData = {
         user_id: user.id,
         type: defaultType,
@@ -521,7 +328,10 @@ export default function AddMediaModal({
         status: status || null, // "ended" ou "ongoing"
       };
 
-      const { error } = await supabase.from("media_items").insert(insertData);
+      const { error } = await supabase
+        .schema("watching")
+        .from("media_items")
+        .insert(insertData);
       if (error) throw error;
 
       onAdded();
@@ -840,63 +650,6 @@ export default function AddMediaModal({
                             className="w-full p-4 bg-zinc-800/50 border border-white/5 rounded-2xl text-white text-sm placeholder:text-zinc-600 focus:outline-none focus:ring-1 focus:ring-blue-500/50 h-24 resize-none transition-all"
                           />
                         </div>
-                        {/* Champs séries / animes */}
-                        {/* {(defaultType === "serie" ||
-                          defaultType === "anime") && (
-                          <div className="grid grid-cols-3 gap-4">
-                            <div>
-                              <label className="text-xs font-bold text-zinc-500">
-                                Saisons
-                              </label>
-                              <input
-                                type="number"
-                                value={seasons || ""}
-                                onChange={(e) =>
-                                  setSeasons(
-                                    e.target.value
-                                      ? Number(e.target.value)
-                                      : null,
-                                  )
-                                }
-                                className="w-full p-3 bg-zinc-800/50 border border-white/5 rounded-2xl text-white"
-                              />
-                            </div>
-                            <div>
-                              <label className="text-xs font-bold text-zinc-500">
-                                Épisodes
-                              </label>
-                              <input
-                                type="number"
-                                value={episodes || ""}
-                                onChange={(e) =>
-                                  setEpisodes(
-                                    e.target.value
-                                      ? Number(e.target.value)
-                                      : null,
-                                  )
-                                }
-                                className="w-full p-3 bg-zinc-800/50 border border-white/5 rounded-2xl text-white"
-                              />
-                            </div>
-                            <div>
-                              <label className="text-xs font-bold text-zinc-500">
-                                Épisode actuel
-                              </label>
-                              <input
-                                type="number"
-                                value={currentEpisode || ""}
-                                onChange={(e) =>
-                                  setCurrentEpisode(
-                                    e.target.value
-                                      ? Number(e.target.value)
-                                      : null,
-                                  )
-                                }
-                                className="w-full p-3 bg-zinc-800/50 border border-white/5 rounded-2xl text-white"
-                              />
-                            </div>
-                          </div>
-                        )} */}
                       </div>
 
                       {/* Options Section */}

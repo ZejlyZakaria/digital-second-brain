@@ -29,6 +29,7 @@ export default function LibraryPage() {
       if (!user) return;
 
       const { data } = await supabase
+        .schema("watching")
         .from("media_items")
         .select("*")
         .eq("user_id", user.id)

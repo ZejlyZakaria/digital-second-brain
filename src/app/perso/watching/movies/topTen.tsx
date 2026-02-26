@@ -30,7 +30,8 @@ export default function TopTen({ onAddClick, refreshTrigger }: TopTenProps) {
         }
 
         const { data, error: fetchError } = await supabase
-          .from("media_items")
+          .schema('watching')
+          .from('media_items')
           .select("*")
           .eq("user_id", user.id)
           .eq("type", "film")

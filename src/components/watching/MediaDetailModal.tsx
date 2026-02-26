@@ -50,6 +50,7 @@ export default function MediaDetailModal({
     setSaving(true);
     try {
       const { error } = await supabase
+        .schema("watching")
         .from("media_items")
         .update({ notes, favorite })
         .eq("id", item.id);

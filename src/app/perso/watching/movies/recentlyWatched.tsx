@@ -32,6 +32,7 @@ export default function RecentlyWatched({
         }
 
         const { data, error: fetchError } = await supabase
+          .schema("watching")
           .from("media_items")
           .select("*")
           .eq("user_id", user.id)

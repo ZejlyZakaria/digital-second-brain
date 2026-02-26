@@ -39,6 +39,7 @@ export default function TopTenBase({
         const mediaType = variant === "tv" ? "serie" : "anime";
 
         const { data, error: fetchError } = await supabase
+          .schema("watching")
           .from("media_items")
           .select("*")
           .eq("user_id", user.id)
