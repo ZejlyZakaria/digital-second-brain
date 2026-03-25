@@ -1,11 +1,19 @@
 "use client";
 
 import LibraryCard from "./LibraryCard";
-import type { WatchItem } from "@/lib/watching-data";
+import type { WatchItem } from "@/lib/utils/watching-data";
 import { useState } from "react";
 import MediaDetailModal from "@/components/watching/MediaDetailModal";
 
-export default function LibraryGrid({ items }: { items: WatchItem[] }) {
+export default function LibraryGrid({
+  items,
+  onUpdate,
+  onDelete,
+}: {
+  items: WatchItem[];
+  onUpdate?: (item: WatchItem) => void;
+  onDelete?: (itemId: string) => void;
+}) {
   const [selectedItem, setSelectedItem] = useState<WatchItem | null>(null);
 
   return (
@@ -16,9 +24,13 @@ export default function LibraryGrid({ items }: { items: WatchItem[] }) {
         </p>
       </div>
 
-      <div className="grid grid-cols-1 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-6">
+      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 xl:grid-cols-8 gap-6">
         {items.map((item) => (
-          <LibraryCard key={item.id} item={item} onClick={() => setSelectedItem(item)}/>
+          <LibraryCard
+            key={item.id}
+            item={item}
+            onClick={() => setSelectedItem(item)}
+          />
         ))}
       </div>
 
@@ -27,6 +39,18 @@ export default function LibraryGrid({ items }: { items: WatchItem[] }) {
           isOpen={!!selectedItem}
           onClose={() => setSelectedItem(null)}
           item={selectedItem}
+          onUpdate={(item) => {
+            onUpdate?.(item);
+            setSelectedItem(null);
+          }}
+          onDelete={
+            onDelete
+              ? (id) => {
+                  onDelete(id);
+                  setSelectedItem(null);
+                }
+              : undefined
+          }
         />
       )}
 

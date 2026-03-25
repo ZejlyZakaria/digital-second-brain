@@ -2,7 +2,7 @@
 
 import Image from "next/image";
 import { Star, Heart } from "lucide-react";
-import type { WatchItem } from "@/lib/watching-data";
+import type { WatchItem } from "@/lib/utils/watching-data";
 
 interface Props {
   item: WatchItem;
@@ -11,13 +11,18 @@ interface Props {
 
 export default function LibraryCard({ item, onClick }: Props) {
   return (
-    <div className="group relative cursor-pointer overflow-hidden rounded-xl" onClick={onClick}>
+    <div
+      className="group relative cursor-pointer overflow-hidden rounded-xl"
+      onClick={onClick}
+    >
       <div className="relative aspect-2/3 overflow-hidden rounded-xl shadow-xl">
         <Image
           src={item.poster_url || "/placeholder.svg"}
           alt={item.title}
           fill
           className="object-cover transition-transform duration-500 group-hover:scale-105"
+          sizes="(max-width: 768px) 100vw, 50vw"
+          quality={75}
         />
 
         {/* Favorite heart */}
@@ -35,18 +40,18 @@ export default function LibraryCard({ item, onClick }: Props) {
           {item.user_rating && (
             <div className="flex items-center gap-1.5 text-white">
               <Star size={14} className="fill-amber-400 text-amber-400" />
-              <span className="font-semibold">{item.user_rating}/10</span>
+              <span className="text-sm font-semibold">{item.user_rating}/10</span>
             </div>
           )}
         </div>
       </div>
 
       <div className="mt-3 px-1">
-        <h4 className="font-semibold text-white line-clamp-1">{item.title}</h4>
+        <h4 className="font-semibold text-white text-sm line-clamp-1">{item.title}</h4>
         <div className="mt-1 flex items-center justify-between text-xs text-zinc-400">
-          <span>{item.year}</span>
+          <span className="mr-2">{item.year}</span>
           {item.tags?.length > 0 && (
-            <span className="text-[10px] uppercase tracking-wider">
+            <span className="text-[9px] uppercase tracking-wider line-clamp-1">
               {item.tags[0]}
             </span>
           )}

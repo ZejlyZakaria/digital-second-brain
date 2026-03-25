@@ -1,79 +1,100 @@
+// components/watching/LibraryFilters.tsx
 "use client";
 
 import { useState } from "react";
 import { ArrowUpDown } from "lucide-react";
-import { cn } from "@/lib/utils";
-import NormalSelect from "@/ui/inputs/insideLabel/normalSelect";
+import { cn } from "@/lib/utils/utils";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
-type SortKey = "added" | "rating" | "title" | "year" | "favorite";
+// ─── types ────────────────────────────────────────────────────────────────────
 
-type LibraryFiltersProps = {
-  onFilterChange: (filters: {
-    mediaType: "all" | "film" | "serie" | "anime";
-    sortBy: SortKey;
-  }) => void;
-};
+type MediaType = "all" | "film" | "serie" | "anime";
+type SortKey   = "added" | "rating" | "title" | "year" | "favorite";
 
-export default function LibraryFilters({ onFilterChange }: LibraryFiltersProps) {
-  const [mediaType, setMediaType] = useState<"all" | "film" | "serie" | "anime">("all");
-  const [sortBy, setSortBy] = useState<SortKey>("added");
+interface Props {
+  onFilterChange: (filters: { mediaType: MediaType; sortBy: SortKey }) => void;
+}
 
-  const handleMediaChange = (newType: typeof mediaType) => {
-    setMediaType(newType);
-    onFilterChange({ mediaType: newType, sortBy });
+// ─── config ───────────────────────────────────────────────────────────────────
+
+const MEDIA_TYPES: { value: MediaType; label: string }[] = [
+  { value: "all",   label: "Tout" },
+  { value: "film",  label: "Films" },
+  { value: "serie", label: "Séries" },
+  { value: "anime", label: "Animes" },
+];
+
+const SORT_OPTIONS: { value: SortKey; label: string }[] = [
+  { value: "added",    label: "Date d'ajout" },
+  { value: "rating",   label: "Note" },
+  { value: "title",    label: "Titre" },
+  { value: "year",     label: "Année" },
+  { value: "favorite", label: "Favoris" },
+];
+
+// ─── main ─────────────────────────────────────────────────────────────────────
+
+export default function LibraryFilters({ onFilterChange }: Props) {
+  const [mediaType, setMediaType] = useState<MediaType>("all");
+  const [sortBy, setSortBy]       = useState<SortKey>("added");
+
+  const handleMediaChange = (value: MediaType) => {
+    setMediaType(value);
+    onFilterChange({ mediaType: value, sortBy });
   };
 
-  const handleSortChange = (newSort: string) => {
-    const typedSort = newSort as SortKey;
-    setSortBy(typedSort);
-    onFilterChange({ mediaType, sortBy: typedSort });
+  const handleSortChange = (value: SortKey) => {
+    setSortBy(value);
+    onFilterChange({ mediaType, sortBy: value });
   };
 
   return (
-    <div className="flex flex-wrap items-center gap-4 mb-4">
-      
-      {/* Media Type Chips */}
+    <div className="flex flex-wrap items-center gap-3">
+      {/* media type chips */}
       <div className="flex gap-2">
-        {(["all", "film", "serie", "anime"] as const).map((type) => (
+        {MEDIA_TYPES.map(({ value, label }) => (
           <button
-            key={type}
-            onClick={() => handleMediaChange(type)}
+            key={value}
+            onClick={() => handleMediaChange(value)}
             className={cn(
-              "rounded-full px-4 py-1.5 text-sm font-medium transition",
-              mediaType === type
+              "rounded-full px-4 py-1.5 text-sm font-medium transition-all duration-150",
+              mediaType === value
                 ? "bg-white text-black"
-                : "bg-white/10 text-zinc-400 hover:bg-white/20"
+                : "bg-zinc-900 border border-zinc-800 text-zinc-400 hover:text-zinc-200 hover:border-zinc-600"
             )}
           >
-            {type === "all"
-              ? "Tout"
-              : type === "film"
-              ? "Films"
-              : type === "serie"
-              ? "Séries"
-              : "Animes"}
+            {label}
           </button>
         ))}
       </div>
 
-      {/* Sort */}
-      <div className="flex items-center gap-3 ml-auto">
-        <ArrowUpDown size={16} className="text-zinc-500" />
-        <span className="text-sm text-zinc-500">Trier par :</span>
-
-        <NormalSelect
-          id="sort-select"
-          value={sortBy}
-          onChange={handleSortChange}
-          className="w-34"
-          options={[
-            { label: "Date d'ajout", value: "added" },
-            { label: "Note", value: "rating" },
-            { label: "Titre", value: "title" },
-            { label: "Année", value: "year" },
-            { label: "Favoris", value: "favorite" },
-          ]}
-        />
+      {/* sort select — shadcn */}
+      <div className="flex items-center gap-2 ml-auto">
+        <ArrowUpDown size={14} className="text-zinc-500 shrink-0" />
+        <Select value={sortBy} onValueChange={v => handleSortChange(v as SortKey)}>
+          <SelectTrigger
+            className="w-40 h-9 bg-zinc-900 border-zinc-800 text-zinc-300 text-sm hover:border-zinc-600 focus:ring-0 focus:ring-offset-0 transition-colors"
+          >
+            <SelectValue placeholder="Trier par..." />
+          </SelectTrigger>
+          <SelectContent className="bg-zinc-900 border-zinc-800 text-zinc-300">
+            {SORT_OPTIONS.map(({ value, label }) => (
+              <SelectItem
+                key={value}
+                value={value}
+                className="text-sm focus:bg-zinc-800 focus:text-white cursor-pointer"
+              >
+                {label}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
       </div>
     </div>
   );

@@ -5,7 +5,6 @@
 import { useState, useEffect, useCallback } from "react";
 import { Dialog, Transition } from "@headlessui/react";
 import { Fragment } from "react";
-import { supabase } from "@/lib/supabase";
 import {
   Search,
   X,
@@ -21,17 +20,28 @@ import {
   History,
   Eye,
   Tag,
+  Play,
+  AlertCircle,
 } from "lucide-react";
-import { mapTmdbGenres } from "@/lib/tmdb-utils";
-import { cn } from "@/lib/utils";
+import { mapTmdbGenres } from "@/lib/utils/tmdb-utils";
+import { cn } from "@/lib/utils/utils";
+import { Button } from "@/components/ui/button";
 
-type ListType = "topTen" | "recentlyWatched" | "wantToWatch";
+import { createClient } from "@/lib/supabase/client";
+const supabase = createClient();
+
+type ListType =
+  | "topTen"
+  | "inProgress"
+  | "recentlyWatched"
+  | "wantToWatch"
+  | "library";
 type MediaType = "film" | "serie" | "anime";
 
 type AddMediaModalProps = {
   isOpen: boolean;
   onClose: () => void;
-  onAdded: () => void;
+  onAdded: (item?: any) => void;
   defaultType?: MediaType;
   listContext?: ListType;
 };
@@ -49,17 +59,26 @@ export default function AddMediaModal({
   const [customPoster, setCustomPoster] = useState<File | null>(null);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+  const [conflict, setConflict] = useState<{
+    existingLists: string[];
+    canAdd: boolean;
+    message: string;
+  } | null>(null);
+
   const [userRating, setUserRating] = useState<number>(0);
   const [notes, setNotes] = useState("");
   const [favorite, setFavorite] = useState(false);
 
   const [priority, setPriority] = useState<number | null>(null);
+  const [priorityLevel, setPriorityLevel] = useState<"high" | "medium" | "low">(
+    "medium",
+  );
   const [takenPriorities, setTakenPriorities] = useState<number[]>([]);
 
-  //
   const [seasons, setSeasons] = useState<number | null>(null);
   const [episodes, setEpisodes] = useState<number | null>(null);
-  // const [currentEpisode, setCurrentEpisode] = useState<number | null>(null);
+  const [currentSeason, setCurrentSeason] = useState<number>(1);
+  const [currentEpisode, setCurrentEpisode] = useState<number>(1);
   const [runtime, setRuntime] = useState<number | null>(null);
   const [directors, setDirectors] = useState<
     { name: string; profile_url: string | null }[] | null
@@ -101,6 +120,10 @@ export default function AddMediaModal({
         setNotes("");
         setFavorite(false);
         setPriority(null);
+        setCurrentSeason(1);
+        setCurrentEpisode(1);
+        setConflict(null);
+        setPriorityLevel("medium");
       }, 300);
       return () => clearTimeout(timer);
     } else {
@@ -155,7 +178,6 @@ export default function AddMediaModal({
         result.media_type || (result.first_air_date ? "tv" : "movie");
       const isMovie = mediaType === "movie";
 
-      // On ajoute credits pour les films ET les séries pour avoir les directeurs/créateurs
       const endpoint = isMovie
         ? `https://api.themoviedb.org/3/movie/${result.id}?append_to_response=credits`
         : `https://api.themoviedb.org/3/tv/${result.id}?append_to_response=credits`;
@@ -165,7 +187,7 @@ export default function AddMediaModal({
       );
       const details = await res.json();
 
-      // 🕒 Calcul du Runtime (Moyenne pour les séries)
+      // Runtime
       let runtimeMinutes: number | null = null;
       if (isMovie) {
         runtimeMinutes = details.runtime ?? null;
@@ -184,7 +206,7 @@ export default function AddMediaModal({
         }
       }
 
-      // 🎬 Extraction des Directeurs / Créateurs
+      // Directeurs / Créateurs
       let extractedDirectors = null;
       if (isMovie) {
         const crew = details.credits?.crew ?? [];
@@ -197,7 +219,6 @@ export default function AddMediaModal({
               : null,
           }));
       } else {
-        // Pour les séries, on prend les créateurs (Created By)
         extractedDirectors =
           details.created_by?.map((c: any) => ({
             name: c.name,
@@ -207,12 +228,12 @@ export default function AddMediaModal({
           })) || null;
       }
 
-      // 🏢 Studio / Network
+      // Studio / Network
       const extractedStudio = isMovie
         ? (details.production_companies?.[0]?.name ?? null)
         : (details.networks?.[0]?.name ?? null);
 
-      // 📊 Status
+      // Status
       const rawStatus = details.status?.toLowerCase() ?? null;
       const extractedStatus = isMovie
         ? rawStatus
@@ -220,7 +241,6 @@ export default function AddMediaModal({
           ? "ended"
           : "ongoing";
 
-      // Mise à jour des états
       setRuntime(runtimeMinutes);
       setDirectors(extractedDirectors);
       setStudio(extractedStudio);
@@ -231,8 +251,6 @@ export default function AddMediaModal({
         setEpisodes(details.number_of_episodes ?? null);
       }
 
-      // IMPORTANT : On stocke les détails complets dans l'item sélectionné
-      // pour que handleSubmit y ait accès sans attendre les états React
       setSelectedItem({
         ...result,
         ...details,
@@ -241,6 +259,164 @@ export default function AddMediaModal({
         extractedStudio,
         extractedStatus,
       });
+
+      // ✅ Vérifier si tmdb_id existe déjà en DB
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
+      if (user) {
+        const { data: existing } = await supabase
+          .schema("watching")
+          .from("media_items")
+          .select(
+            "id, favorite, priority, in_progress, want_to_watch, watched, recently_watched, user_rating, notes, current_season, current_episode",
+          )
+          .eq("user_id", user.id)
+          .eq("type", defaultType)
+          .eq("tmdb_id", result.id)
+          .maybeSingle();
+
+        if (existing) {
+          // ✅ PRÉ-REMPLIR LES DONNÉES EXISTANTES
+          setUserRating(existing.user_rating ?? 0);
+          setNotes(existing.notes ?? "");
+          setFavorite(existing.favorite ?? false);
+
+          if (listContext === "inProgress") {
+            setCurrentSeason(existing.current_season ?? 1);
+            setCurrentEpisode(existing.current_episode ?? 1);
+          }
+
+          // ✅ DÉTECTER OÙ EST LE MÉDIA ACTUELLEMENT
+          const isInLibrary =
+            existing.watched &&
+            !existing.recently_watched &&
+            existing.priority == null;
+          const isInRecentlyWatched = existing.recently_watched;
+          const isInTopTen = existing.priority != null;
+          const isInProgress = existing.in_progress;
+          const isInWantToWatch = existing.want_to_watch;
+
+          // ✅ CONSTRUIRE LA LISTE DES EMPLACEMENTS
+          const existingLists: string[] = [];
+          if (isInTopTen) existingLists.push("Top 10");
+          if (isInProgress) existingLists.push("En cours");
+          if (isInWantToWatch) existingLists.push("À voir");
+          if (isInRecentlyWatched) existingLists.push("Vu récemment");
+          if (isInLibrary) existingLists.push("Library");
+
+          // ✅ VÉRIFIER SI DÉJÀ DANS LA LISTE CIBLE (DOUBLON)
+          const isAlreadyInTargetList =
+            (listContext === "library" && isInLibrary) ||
+            (listContext === "recentlyWatched" && isInRecentlyWatched) ||
+            (listContext === "topTen" && isInTopTen) ||
+            (listContext === "inProgress" && isInProgress) ||
+            (listContext === "wantToWatch" && isInWantToWatch);
+
+          if (isAlreadyInTargetList) {
+            const listNames = {
+              library: "Library",
+              recentlyWatched: "Vu récemment",
+              topTen: "Top 10",
+              inProgress: "En cours",
+              wantToWatch: "À voir",
+            };
+            setConflict({
+              existingLists,
+              canAdd: false,
+              message: `Ce média est déjà dans "${listNames[listContext]}". Tu ne peux pas l'ajouter à nouveau.`,
+            });
+            return;
+          }
+
+          // ✅ TRANSITIONS INTERDITES
+          const forbiddenTransitions = [
+            // Vu Récemment → Library (déjà dedans automatiquement)
+            listContext === "library" && isInRecentlyWatched,
+            // Top 10 → Library (déjà dedans automatiquement)
+            listContext === "library" && isInTopTen,
+            // Library/Vu Récemment/Top 10 → À Voir (incohérent)
+            listContext === "wantToWatch" &&
+              (isInLibrary || isInRecentlyWatched || isInTopTen),
+            // En cours → Library (incohérent)
+            listContext === "library" && isInProgress,
+            // À Voir → Vu Récemment (doit utiliser le bouton "Marquer comme vu")
+            listContext === "recentlyWatched" && isInWantToWatch,
+          ];
+
+          // ✅ MESSAGES CONTEXTUELS POUR LES TRANSITIONS AUTORISÉES
+          let contextualMessage = "";
+          const ratingText = existing.user_rating
+            ? ` (note ${existing.user_rating}/10)`
+            : "";
+
+          if (listContext === "topTen") {
+            if (isInLibrary) {
+              contextualMessage = `Ce média est dans ta Library${ratingText}. Il sera ajouté au Top 10 — vérifie ta note.`;
+            } else if (isInWantToWatch) {
+              contextualMessage = `Tu vas marquer ce média comme vu ET le classer dans ton Top 10.`;
+            } else if (isInProgress) {
+              contextualMessage = `Tu as fini ce média ! Il sera classé dans ton Top 10.`;
+            } else if (isInRecentlyWatched) {
+              contextualMessage = `Ce média vu récemment sera classé dans ton Top 10.`;
+            }
+          } else if (listContext === "recentlyWatched") {
+            if (isInLibrary) {
+              contextualMessage = `Ce média est dans ta Library${ratingText}. Il sera ajouté à Vu récemment avec la date d'aujourd'hui.`;
+            } else if (isInTopTen) {
+              contextualMessage = `Ce média de ton Top 10 sera ajouté à Vu récemment (il reste dans ton Top 10).`;
+            } else if (isInProgress) {
+              contextualMessage = `Tu as fini ce média ! Il sera ajouté à Vu récemment.`;
+            }
+          } else if (listContext === "inProgress") {
+            if (isInLibrary) {
+              contextualMessage = `Ce média est dans ta Library. Il sera déplacé vers En cours et ne sera plus visible dans Library (sauf s'il est aussi dans ton Top 10).`;
+            } else if (isInRecentlyWatched) {
+              contextualMessage = `Ce média vu récemment sera marqué comme "En cours" — indique où tu en es.`;
+            } else if (isInTopTen) {
+              contextualMessage = `Ce média de ton Top 10 sera marqué comme "En cours" — indique où tu en es.`;
+            } else if (isInWantToWatch) {
+              contextualMessage = `Tu commences ce média — indique à quel épisode tu es.`;
+            }
+          }
+
+          // ✅ SI UN MESSAGE CONTEXTUEL EXISTE → AUTORISÉ
+          if (contextualMessage) {
+            setConflict({
+              existingLists,
+              canAdd: true,
+              message: contextualMessage,
+            });
+            return;
+          }
+
+          // ✅ VÉRIFIER LES TRANSITIONS INTERDITES
+          // Message spécifique pour À Voir → Vu Récemment
+          if (listContext === "recentlyWatched" && isInWantToWatch) {
+            setConflict({
+              existingLists,
+              canAdd: false,
+              message: `Utilise le bouton "Marquer comme vu" depuis ta liste À Voir.`,
+            });
+            return;
+          }
+
+          // Autres transitions interdites
+          if (forbiddenTransitions.some(Boolean)) {
+            setConflict({
+              existingLists,
+              canAdd: false,
+              message: `Ce média est dans "${existingLists.join(", ")}". Cette transition n'est pas autorisée.`,
+            });
+            return;
+          }
+
+          // Aucun conflit
+          setConflict(null);
+        } else {
+          setConflict(null);
+        }
+      }
     } catch (err) {
       console.error("❌ Erreur détails TMDB:", err);
     }
@@ -300,41 +476,121 @@ export default function AddMediaModal({
         runtime: runtime,
         rating: selectedItem.vote_average,
 
-        // Champs obligatoires selon contexte
-        user_rating: listContext === "wantToWatch" ? null : userRating,
-        watched: listContext !== "wantToWatch",
+        user_rating:
+          listContext === "wantToWatch" || listContext === "inProgress"
+            ? null
+            : userRating > 0
+              ? userRating
+              : null,
+
+        watched:
+          listContext === "recentlyWatched" ||
+          listContext === "topTen" ||
+          listContext === "library",
+
+        recently_watched: listContext === "recentlyWatched",
+
+        watched_at:
+          listContext === "recentlyWatched" || listContext === "topTen"
+            ? new Date().toISOString()
+            : null,
+
         want_to_watch: listContext === "wantToWatch",
         favorite: listContext === "topTen" ? true : favorite,
 
-        // Priority (Top 10 seulement)
         priority: listContext === "topTen" ? priority : null,
+        priority_level: listContext === "wantToWatch" ? priorityLevel : null,
 
-        // Champs séries / animes
         seasons:
           defaultType === "serie" || defaultType === "anime" ? seasons : null,
+        current_episode: listContext === "inProgress" ? currentEpisode : null,
+        current_season: listContext === "inProgress" ? currentSeason : null,
+        in_progress: listContext === "inProgress",
         episodes:
           defaultType === "serie" || defaultType === "anime" ? episodes : null,
-        // current_episode: defaultType === "serie" || defaultType === "anime" ? currentEpisode : null,
 
         tmdb_id: selectedItem.id,
         tags: mapTmdbGenres(selectedItem.genre_ids),
         notes,
-        watched_at:
-          listContext === "recentlyWatched" ? new Date().toISOString() : null,
 
-        // 🔹 Nouveaux champs
-        directors: directors || null, // tableau JSON [{name, profile_url}, ...]
-        studio: studio || null, // nom de la boîte ou réseau
-        status: status || null, // "ended" ou "ongoing"
+        directors: directors || null,
+        studio: studio || null,
+        status: status || null,
       };
 
-      const { error } = await supabase
+      const { data: existing } = await supabase
         .schema("watching")
         .from("media_items")
-        .insert(insertData);
-      if (error) throw error;
+        .select(
+          "id, favorite, priority, recently_watched, watched_at, in_progress, want_to_watch",
+        )
+        .eq("user_id", user.id)
+        .eq("type", defaultType)
+        .eq("tmdb_id", selectedItem.id)
+        .maybeSingle();
 
-      onAdded();
+      let inserted;
+
+      if (existing?.id) {
+        // ✅ CAS SPÉCIAL : En Cours → Logique différente
+        if (listContext === "inProgress") {
+          const updateData = {
+            current_episode: currentEpisode,
+            current_season: currentSeason,
+            in_progress: true,
+            watched: false,
+            recently_watched: false,
+            want_to_watch: false,
+            // Préserver priority si existe (Top 10 + En Cours possible)
+            priority: existing.priority,
+          };
+          const { data, error } = await supabase
+            .schema("watching")
+            .from("media_items")
+            .update(updateData)
+            .eq("id", existing.id)
+            .select()
+            .single();
+          if (error) throw error;
+          inserted = data;
+        } else {
+          // ✅ LOGIQUE CUMULATIVE : Préserver les attributs existants
+          const updateData: any = { ...insertData };
+
+          // Préserver priority (Top 10) si on ajoute ailleurs
+          if (listContext !== "topTen" && existing.priority != null) {
+            updateData.priority = existing.priority;
+            updateData.favorite = true; // Top 10 implique favorite
+          }
+
+          // Préserver recently_watched si on ajoute au Top 10
+          if (listContext === "topTen" && existing.recently_watched) {
+            updateData.recently_watched = true;
+            updateData.watched_at = existing.watched_at; // Garder la date originale
+          }
+
+          const { data, error } = await supabase
+            .schema("watching")
+            .from("media_items")
+            .update(updateData)
+            .eq("id", existing.id)
+            .select()
+            .single();
+          if (error) throw error;
+          inserted = data;
+        }
+      } else {
+        const { data, error } = await supabase
+          .schema("watching")
+          .from("media_items")
+          .insert(insertData)
+          .select()
+          .single();
+        if (error) throw error;
+        inserted = data;
+      }
+
+      onAdded(inserted);
       onClose();
     } catch (err) {
       console.error(err);
@@ -358,6 +614,12 @@ export default function AddMediaModal({
           desc: "Sélectionnez l'élite de votre collection.",
           icon: <Trophy className="text-amber-500" size={20} />,
         };
+      case "inProgress":
+        return {
+          title: `Ajouter ${typeLabel} En Cours`,
+          desc: "Précise où tu en es dans ton visionnage.",
+          icon: <Play className="text-blue-500" size={20} />,
+        };
       case "recentlyWatched":
         return {
           title: `Ajouter ${typeLabel} aux Vus`,
@@ -369,6 +631,12 @@ export default function AddMediaModal({
           title: `Ajouter ${typeLabel} à Voir`,
           desc: "Planifiez vos futures découvertes.",
           icon: <Bookmark className="text-emerald-500" size={20} />,
+        };
+      case "library":
+        return {
+          title: `Ajouter à ma Bibliothèque`,
+          desc: "Archive ce média dans ta collection personnelle.",
+          icon: <Film className="text-violet-400" size={20} />,
         };
       default:
         return {
@@ -432,7 +700,12 @@ export default function AddMediaModal({
               </div>
 
               {/* Content */}
-              <div className="flex-1 overflow-y-auto p-5 md:p-6 custom-scrollbar">
+              <div
+                className={cn(
+                  "flex-1 p-5 md:p-6 custom-scrollbar",
+                  selectedItem ? "overflow-y-auto" : "overflow-hidden",
+                )}
+              >
                 {/* Search */}
                 <div className="relative mb-6">
                   <div className="relative group">
@@ -496,6 +769,20 @@ export default function AddMediaModal({
                     </div>
                   )}
                 </div>
+
+                {conflict && (
+                  <div
+                    className={cn(
+                      "flex items-start gap-2 px-3 py-2.5 rounded-xl text-xs mb-4 border",
+                      conflict.canAdd
+                        ? "bg-amber-500/10 border-amber-500/20 text-amber-400"
+                        : "bg-red-500/10 border-red-500/20 text-red-400",
+                    )}
+                  >
+                    <AlertCircle size={13} className="shrink-0 mt-0.5" />
+                    {conflict.message}
+                  </div>
+                )}
 
                 {selectedItem ? (
                   <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-400">
@@ -581,33 +868,36 @@ export default function AddMediaModal({
                     {/* Inputs */}
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                       <div className="space-y-5">
-                        {/* Rating Progress Bar (Slider) */}
-                        {listContext !== "wantToWatch" && (
-                          <div>
-                            <label className="text-xs font-bold text-zinc-500 uppercase tracking-wider mb-3 flex items-center justify-between">
-                              <span className="flex items-center gap-2">
-                                <Star size={14} className="text-blue-500" />{" "}
-                                Votre note
-                              </span>
-                              <span className="text-blue-500 font-black text-base">
-                                {userRating > 0 ? userRating.toFixed(1) : "--"}
-                              </span>
-                            </label>
-                            <input
-                              type="range"
-                              min="0"
-                              max="10"
-                              step="0.5"
-                              value={userRating}
-                              onChange={(e) =>
-                                setUserRating(parseFloat(e.target.value))
-                              }
-                              className="w-full h-1.5 bg-zinc-800 rounded-lg appearance-none cursor-pointer accent-blue-500"
-                            />
-                          </div>
-                        )}
+                        {/* Rating */}
+                        {listContext !== "wantToWatch" &&
+                          listContext !== "inProgress" && (
+                            <div>
+                              <label className="text-xs font-bold text-zinc-500 uppercase tracking-wider mb-3 flex items-center justify-between">
+                                <span className="flex items-center gap-2">
+                                  <Star size={14} className="text-blue-500" />{" "}
+                                  Votre note
+                                </span>
+                                <span className="text-blue-500 font-black text-base">
+                                  {userRating > 0
+                                    ? userRating.toFixed(1)
+                                    : "--"}
+                                </span>
+                              </label>
+                              <input
+                                type="range"
+                                min="0"
+                                max="10"
+                                step="0.5"
+                                value={userRating}
+                                onChange={(e) =>
+                                  setUserRating(parseFloat(e.target.value))
+                                }
+                                className="w-full h-1.5 bg-zinc-800 rounded-lg appearance-none cursor-pointer accent-blue-500"
+                              />
+                            </div>
+                          )}
 
-                        {/* Ranking Top 10 (Priority) - Single Line */}
+                        {/* Top 10 Priority */}
                         {listContext === "topTen" && (
                           <div>
                             <label className="text-xs font-bold text-zinc-500 uppercase tracking-wider mb-3 flex items-center gap-2">
@@ -715,18 +1005,151 @@ export default function AddMediaModal({
                             </>
                           )}
 
-                          {listContext === "wantToWatch" && (
-                            <div className="p-4 bg-emerald-500/5 rounded-2xl border border-emerald-500/10 flex items-start gap-3">
-                              <Bookmark
-                                className="text-emerald-500 shrink-0"
-                                size={18}
-                              />
-                              <p className="text-[11px] text-emerald-200/60 leading-relaxed">
-                                Ajouté à votre liste <strong>À regarder</strong>
-                                . La note et les favoris sont désactivés car
-                                vous ne l avez pas encore vu.
-                              </p>
+                          {listContext === "inProgress" && (
+                            <div className="space-y-4">
+                              <div className="p-4 bg-blue-500/5 rounded-2xl border border-blue-500/10 flex items-start gap-3">
+                                <Play
+                                  className="text-blue-400 shrink-0"
+                                  size={18}
+                                />
+                                <p className="text-[11px] text-blue-200/60 leading-relaxed">
+                                  Précise où tu en es pour suivre ta
+                                  progression.
+                                </p>
+                              </div>
+                              <div className="grid grid-cols-2 gap-3">
+                                <div className="space-y-1.5">
+                                  <label className="text-xs font-bold text-zinc-500 uppercase tracking-wider">
+                                    Saison
+                                  </label>
+                                  <input
+                                    type="number"
+                                    min={1}
+                                    value={currentSeason}
+                                    onChange={(e) =>
+                                      setCurrentSeason(
+                                        Math.max(
+                                          1,
+                                          parseInt(e.target.value) || 1,
+                                        ),
+                                      )
+                                    }
+                                    className="w-full bg-zinc-800/50 border border-white/5 rounded-xl px-3 py-2.5 text-sm text-white focus:outline-none focus:ring-1 focus:ring-blue-500/50"
+                                  />
+                                </div>
+                                <div className="space-y-1.5">
+                                  <label className="text-xs font-bold text-zinc-500 uppercase tracking-wider">
+                                    Épisode
+                                  </label>
+                                  <input
+                                    type="number"
+                                    min={1}
+                                    value={currentEpisode}
+                                    onChange={(e) =>
+                                      setCurrentEpisode(
+                                        Math.max(
+                                          1,
+                                          parseInt(e.target.value) || 1,
+                                        ),
+                                      )
+                                    }
+                                    className="w-full bg-zinc-800/50 border border-white/5 rounded-xl px-3 py-2.5 text-sm text-white focus:outline-none focus:ring-1 focus:ring-blue-500/50"
+                                  />
+                                </div>
+                              </div>
                             </div>
+                          )}
+
+                          {listContext === "wantToWatch" && (
+                            <div className="space-y-3">
+                              <div className="p-4 bg-emerald-500/5 rounded-2xl border border-emerald-500/10 flex items-start gap-3">
+                                <Bookmark
+                                  className="text-emerald-500 shrink-0"
+                                  size={18}
+                                />
+                                <p className="text-[11px] text-emerald-200/60 leading-relaxed">
+                                  Ajouté à votre liste{" "}
+                                  <strong>À regarder</strong>. La note et les
+                                  favoris sont désactivés car vous ne
+                                  l&apos;avez pas encore vu.
+                                </p>
+                              </div>
+
+                              <div>
+                                <label className="text-xs font-bold text-zinc-500 uppercase tracking-wider mb-2 block">
+                                  Priorité
+                                </label>
+                                <div className="flex gap-2">
+                                  {(["high", "medium", "low"] as const).map(
+                                    (level) => (
+                                      <button
+                                        key={level}
+                                        type="button"
+                                        onClick={() => setPriorityLevel(level)}
+                                        className={cn(
+                                          "flex-1 py-2 rounded-xl text-xs font-semibold border transition-all",
+                                          priorityLevel === level
+                                            ? level === "high"
+                                              ? "bg-red-500/20 border-red-500/50 text-red-400"
+                                              : level === "medium"
+                                                ? "bg-amber-500/20 border-amber-500/50 text-amber-400"
+                                                : "bg-zinc-500/20 border-zinc-500/50 text-zinc-400"
+                                            : "bg-zinc-800/50 border-white/5 text-zinc-600 hover:text-zinc-400",
+                                        )}
+                                      >
+                                        {level === "high"
+                                          ? "🔴 Haute"
+                                          : level === "medium"
+                                            ? "🟡 Moyenne"
+                                            : "⚪ Basse"}
+                                      </button>
+                                    ),
+                                  )}
+                                </div>
+                              </div>
+                            </div>
+                          )}
+
+                          {listContext === "library" && (
+                            <>
+                              <button
+                                onClick={() => setFavorite(!favorite)}
+                                className={cn(
+                                  "w-full flex items-center justify-between p-4 rounded-2xl border transition-all",
+                                  favorite
+                                    ? "bg-rose-500/10 border-rose-500/50 text-rose-400"
+                                    : "bg-zinc-800/50 border-white/5 text-zinc-400",
+                                )}
+                              >
+                                <div className="flex items-center gap-3">
+                                  <Heart
+                                    size={18}
+                                    className={favorite ? "fill-rose-500" : ""}
+                                  />
+                                  <span className="text-sm font-medium">
+                                    Ajouter aux favoris
+                                  </span>
+                                </div>
+                                <div
+                                  className={cn(
+                                    "w-5 h-5 rounded-full border-2 flex items-center justify-center",
+                                    favorite
+                                      ? "border-rose-500 bg-rose-500"
+                                      : "border-zinc-600",
+                                  )}
+                                >
+                                  {favorite && (
+                                    <div className="w-1.5 h-1.5 bg-white rounded-full" />
+                                  )}
+                                </div>
+                              </button>
+                              <div className="p-3 bg-violet-500/5 rounded-xl border border-violet-500/10 flex items-center gap-2">
+                                <Film size={14} className="text-violet-400" />
+                                <p className="text-[10px] text-violet-400/70">
+                                  Sera archivé dans ta bibliothèque.
+                                </p>
+                              </div>
+                            </>
                           )}
                         </div>
                       </div>
@@ -756,36 +1179,31 @@ export default function AddMediaModal({
 
               {/* Footer */}
               <div className="p-5 md:p-6 border-t border-white/5 bg-zinc-900/80 backdrop-blur-md flex justify-end gap-3">
-                <button
+                <Button
+                  variant="ghost"
                   onClick={onClose}
-                  className="px-5 py-2 rounded-xl text-sm font-medium text-zinc-400 hover:bg-white/5 transition-all"
+                  className="text-zinc-400"
                 >
                   Annuler
-                </button>
-                <button
+                </Button>
+                <Button
                   onClick={handleSubmit}
                   disabled={
                     loading ||
                     !selectedItem ||
+                    conflict?.canAdd === false ||
                     (listContext === "topTen" &&
                       (userRating === 0 || priority === null))
                   }
-                  className={cn(
-                    "px-7 py-2 rounded-xl text-sm font-bold transition-all flex items-center gap-2",
-                    loading ||
-                      !selectedItem ||
-                      (listContext === "topTen" && priority === null)
-                      ? "bg-zinc-800 text-zinc-600"
-                      : "bg-blue-600 text-white hover:bg-blue-500 shadow-lg shadow-blue-600/20",
-                  )}
+                  className="bg-blue-600 hover:bg-blue-500 text-white gap-2"
                 >
                   {loading ? (
-                    <Loader2 className="animate-spin" size={18} />
+                    <Loader2 className="animate-spin" size={15} />
                   ) : (
-                    <Plus size={18} />
+                    <Plus size={15} />
                   )}
                   Ajouter
-                </button>
+                </Button>
               </div>
             </Dialog.Panel>
           </Transition.Child>
