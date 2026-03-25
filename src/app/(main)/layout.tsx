@@ -1,0 +1,17 @@
+// app/(main)/layout.tsx
+// all protected routes live under this layout — sidebar always present
+import Sidebar from "@/components/layout/Sidebar";
+
+export default function MainLayout({ children }: { children: React.ReactNode }) {
+  return (
+    <div className="flex h-screen bg-[#09090b] overflow-hidden custom-scrollbar">
+      <Sidebar />
+      <main 
+        className="flex-1 overflow-y-auto overflow-x-hidden"
+        style={{ scrollbarGutter: "stable" }}
+      >
+        {children}
+      </main>
+    </div>
+  );
+}
