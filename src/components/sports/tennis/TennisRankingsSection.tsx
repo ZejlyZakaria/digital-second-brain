@@ -66,7 +66,7 @@ export default async function TennisRankingsSection({
       <div className="flex items-center gap-3 mb-4">
         <div className="h-1 w-12 rounded-full bg-linear-to-r from-amber-500 to-amber-300" />
         <h2 className="text-xs font-bold uppercase tracking-widest text-zinc-500">
-          Classement ATP
+          ATP Standings
         </h2>
         <div className="flex-1 h-px bg-zinc-800" />
       </div>

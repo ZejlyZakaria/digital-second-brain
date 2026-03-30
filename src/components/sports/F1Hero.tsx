@@ -53,7 +53,7 @@ function formatDateTime(date: string | null, time: string | null): string {
   if (!date) return "";
 
   const d = new Date(date);
-  const formatted = d.toLocaleDateString("fr-FR", {
+  const formatted = d.toLocaleDateString("en-US", {
     weekday: "long",
     day: "numeric",
     month: "long",
@@ -99,7 +99,7 @@ export default function F1Hero({ heroData }: { heroData: F1HeroData }) {
       {/* Label "Prochaine course" */}
       <div className="absolute top-4 left-4 z-10">
         <span className="text-white/60 text-[10px] font-bold uppercase tracking-widest">
-          Prochaine course
+          Next Race
         </span>
       </div>
 

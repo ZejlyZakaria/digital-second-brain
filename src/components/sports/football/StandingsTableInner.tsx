@@ -157,15 +157,15 @@ function Legend({ isChampionsLeague }: { isChampionsLeague: boolean }) {
         <div className="flex items-center gap-1.5">
           <span className="inline-block w-1 h-3 rounded-full bg-blue-500" />
           <span className="text-zinc-600 text-[11px]">
-            Qualifié phase suivante
+            Qualified for next round
           </span>
         </div>
         <div className="flex items-center gap-1.5">
           <span className="inline-block w-1 h-3 rounded-full bg-red-500" />
-          <span className="text-zinc-600 text-[11px]">Éliminé</span>
+          <span className="text-zinc-600 text-[11px]">Eliminated</span>
         </div>
         <span className="text-zinc-700 text-[11px] ml-auto italic">
-          Phase de groupes
+          Group Phase
         </span>
       </div>
     );
@@ -262,32 +262,32 @@ export default function StandingsTableInner({
                 </th>
                 <th className="px-2 py-2.5 text-left">
                   <span className="text-[11px] font-semibold text-zinc-600 uppercase tracking-widest">
-                    Équipe
+                    Team
                   </span>
                 </th>
                 <th className="pr-6 py-2.5 text-center w-10">
                   <span className="text-[11px] font-semibold text-zinc-600 uppercase tracking-widest">
-                    MJ
+                    MP
                   </span>
                 </th>
                 <th className="pr-6 py-2.5 text-center w-10 hidden sm:table-cell">
                   <span className="text-[11px] font-semibold text-zinc-600 uppercase tracking-widest">
-                    G
+                    W
                   </span>
                 </th>
                 <th className="pr-6 py-2.5 text-center w-10 hidden sm:table-cell">
                   <span className="text-[11px] font-semibold text-zinc-600 uppercase tracking-widest">
-                    N
+                    D
                   </span>
                 </th>
                 <th className="pr-6 py-2.5 text-center w-10 hidden sm:table-cell">
                   <span className="text-[11px] font-semibold text-zinc-600 uppercase tracking-widest">
-                    P
+                    L
                   </span>
                 </th>
                 <th className="pr-6 py-2.5 text-center w-10 hidden md:table-cell">
                   <span className="text-[11px] font-semibold text-zinc-600 uppercase tracking-widest">
-                    DB
+                    GD
                   </span>
                 </th>
                 <th className="pr-6 py-2.5 text-center w-12">

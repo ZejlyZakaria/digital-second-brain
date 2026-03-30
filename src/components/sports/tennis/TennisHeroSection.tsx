@@ -8,7 +8,7 @@ import type { PlayerHero } from "@/components/sports/TennisHero";
 async function getNextMatch(supabase: any, playerId: string) {
   const { data } = await supabase
     .schema("sport")
-    .from("tennis_matches")  // ✅ CHANGÉ
+    .from("tennis_matches")  
     .select(`
       match_date,
       opponent_name,
@@ -16,8 +16,8 @@ async function getNextMatch(supabase: any, playerId: string) {
       tennis_tournaments(name, surface)
     `)  // ✅ SIMPLIFIÉ
     .eq("player_id", playerId)
-    .eq("status", "scheduled")  // ✅ AJOUTÉ
-    .gte("match_date", new Date().toISOString())  // ✅ CHANGÉ gt → gte
+    .eq("status", "scheduled") 
+    .gte("match_date", new Date().toISOString())  
     .order("match_date", { ascending: true })
     .limit(1)
     .maybeSingle();

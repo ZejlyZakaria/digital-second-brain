@@ -18,7 +18,7 @@ export default async function RecentlyWatchedSection({
     .select("*")
     .eq("user_id", userId)
     .eq("type", config.type)
-    .eq("recently_watched", true)  // ✅ Filtre sur recently_watched au lieu de watched
+    .eq("recently_watched", true)  
     .order("watched_at", { ascending: false })
     .limit(10);
 

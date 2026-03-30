@@ -132,12 +132,12 @@ function PlayerSearchModal({
         <div className="max-h-72 overflow-y-auto">
           {!loading && query.length >= 2 && results.length === 0 && (
             <p className="text-zinc-600 text-sm text-center py-8">
-              Aucun résultat
+              No results found
             </p>
           )}
           {query.length < 2 && (
             <p className="text-zinc-700 text-xs text-center py-8">
-              Tape au moins 2 caractères
+              Enter at least 2 characters
             </p>
           )}
           {results.map((p) => (
@@ -332,7 +332,7 @@ function PlayerDescription({ legend }: { legend: Legend | null }) {
     return (
       <div className="flex items-center justify-center h-full">
         <p className="text-zinc-600 text-xs text-center italic">
-          Sélectionne un joueur pour voir son dossier
+          Select a player to view their profile
         </p>
       </div>
     );
@@ -361,7 +361,7 @@ function PlayerDescription({ legend }: { legend: Legend | null }) {
             </p>
           </div>
           <span className="text-[6px] font-black text-red-500/60 border border-red-500/25 px-1.5 py-0.5 rounded uppercase tracking-widest shrink-0 mt-0.5">
-            CLASSIFIÉ
+            CLASSIFIED
           </span>
         </div>
 
@@ -370,7 +370,7 @@ function PlayerDescription({ legend }: { legend: Legend | null }) {
           {legend.birth_date && (
             <div className="bg-zinc-900/60 rounded-lg px-2 py-1.5">
               <p className="text-zinc-600 text-[8px] uppercase tracking-widest">
-                Naissance
+                Born
               </p>
               <p className="text-zinc-300 text-[10px] font-semibold mt-0.5">
                 {new Date(legend.birth_date).toLocaleDateString("fr-FR", {
@@ -384,7 +384,7 @@ function PlayerDescription({ legend }: { legend: Legend | null }) {
           {legend.birth_location && (
             <div className="bg-zinc-900/60 rounded-lg px-2 py-1.5">
               <p className="text-zinc-600 text-[8px] uppercase tracking-widest">
-                Origine
+                Origin
               </p>
               <p className="text-zinc-300 text-[10px] font-semibold mt-0.5 truncate">
                 {legend.birth_location}
@@ -394,7 +394,7 @@ function PlayerDescription({ legend }: { legend: Legend | null }) {
           {legend.height && (
             <div className="bg-zinc-900/60 rounded-lg px-2 py-1.5">
               <p className="text-zinc-600 text-[8px] uppercase tracking-widest">
-                Taille
+                Height
               </p>
               <p className="text-zinc-300 text-[10px] font-semibold mt-0.5">
                 {legend.height}
@@ -531,7 +531,7 @@ export default function FootballLegends({
       <div className="flex items-center gap-2 shrink-0">
         <div className="flex-1 h-px bg-zinc-800" />
         <span className="text-zinc-700 text-[8px] uppercase tracking-widest font-bold">
-          Dossier
+          Profile
         </span>
         <div className="flex-1 h-px bg-zinc-800" />
       </div>

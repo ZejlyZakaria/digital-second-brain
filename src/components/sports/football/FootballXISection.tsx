@@ -38,7 +38,7 @@ export default function FootballXISection({
         <div className="flex items-center gap-3">
           <div className="h-1 w-12 rounded-full bg-linear-to-r from-emerald-500 to-emerald-300" />
           <h2 className="text-xs font-bold uppercase tracking-widest text-zinc-500">
-            Ma Meilleure Équipe
+            My favorite Best XI
           </h2>
           <div className="flex-1 h-px bg-zinc-800" />
         </div>
@@ -56,7 +56,7 @@ export default function FootballXISection({
         <div className="flex items-center gap-3">
           <div className="h-1 w-12 rounded-full bg-linear-to-r from-emerald-500 to-emerald-300" />
           <h2 className="text-xs font-bold uppercase tracking-widest text-zinc-500">
-            Mes Cartes de Légendes
+            My Legends Cards
           </h2>
           <div className="flex-1 h-px bg-zinc-800" />
         </div>

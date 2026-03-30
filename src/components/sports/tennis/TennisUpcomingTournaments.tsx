@@ -55,12 +55,12 @@ function mapSurfaceType(dbSurface: string | null): Surface {
 }
 
 function formatDateRange(start: string, end: string | null) {
-  const s = new Date(start).toLocaleDateString("fr-FR", {
+  const s = new Date(start).toLocaleDateString("en-US", {
     day: "numeric",
     month: "short",
   });
   if (!end) return s;
-  const e = new Date(end).toLocaleDateString("fr-FR", {
+  const e = new Date(end).toLocaleDateString("en-US", {
     day: "numeric",
     month: "short",
     year: "numeric",
@@ -70,15 +70,15 @@ function formatDateRange(start: string, end: string | null) {
 
 function formatMatchDate(dateStr: string) {
   const date = new Date(dateStr);
-  const dateFormatted = date.toLocaleDateString("fr-FR", {
+  const dateFormatted = date.toLocaleDateString("en-US", {
     day: "numeric",
     month: "short",
   });
-  const timeFormatted = date.toLocaleTimeString("fr-FR", {
+  const timeFormatted = date.toLocaleTimeString("en-US", {
     hour: "2-digit",
     minute: "2-digit",
   });
-  return `${dateFormatted} à ${timeFormatted}`;
+  return `${dateFormatted} at ${timeFormatted}`;
 }
 
 function getTier(name: string): string {
@@ -225,7 +225,7 @@ function TournamentCard({
             <div className="flex items-center gap-1.5">
               <div className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
               <span className="text-emerald-400 text-[9px] font-black uppercase tracking-widest">
-                En cours
+                In progress
               </span>
             </div>
           )}
@@ -264,7 +264,7 @@ function EmptyPlayerCard() {
       <div className="relative p-4 flex flex-col gap-4">
         <div className="flex items-center justify-between">
           <span className="text-zinc-700 text-[11px] font-medium uppercase tracking-wider italic">
-            Aucun joueur suivi inscrit
+            No favorite players subscribed
           </span>
         </div>
 
@@ -453,7 +453,7 @@ export default function TennisUpcomingTournaments({
   if (!tournament) {
     return (
       <div className="rounded-xl border border-zinc-800/60 bg-zinc-950 p-8 flex items-center justify-center">
-        <p className="text-zinc-600 text-sm italic">Aucun tournoi à venir</p>
+        <p className="text-zinc-600 text-sm italic">No upcoming tournaments</p>
       </div>
     );
   }
@@ -462,7 +462,7 @@ export default function TennisUpcomingTournaments({
     <div className="flex flex-col gap-2">
       <div className="flex items-center justify-between gap-3">
         <p className="text-zinc-600 text-xs">
-          Joueurs suivis participant à ce tournoi
+          Favorite players participating in this tournament
         </p>
         <div className="flex items-center gap-1.5 shrink-0">
           <button

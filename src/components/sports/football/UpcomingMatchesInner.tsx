@@ -37,7 +37,7 @@ interface UpcomingMatchesProps {
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
 function formatTime(dateStr: string) {
-  return new Date(dateStr).toLocaleTimeString("fr-FR", { hour: "2-digit", minute: "2-digit" });
+  return new Date(dateStr).toLocaleTimeString("en-US", { hour: "2-digit", minute: "2-digit" });
 }
 
 function formatMatchDate(dateStr: string) {
@@ -45,19 +45,19 @@ function formatMatchDate(dateStr: string) {
   const now  = new Date();
   const tomorrow = new Date();
   tomorrow.setDate(now.getDate() + 1);
-  if (date.toDateString() === now.toDateString()) return "Aujourd'hui";
-  if (date.toDateString() === tomorrow.toDateString()) return "Demain";
-  return date.toLocaleDateString("fr-FR", { day: "numeric", month: "short" });
+  if (date.toDateString() === now.toDateString()) return "Today";
+  if (date.toDateString() === tomorrow.toDateString()) return "Tomorrow";
+  return date.toLocaleDateString("en-US", { day: "numeric", month: "short" });
 }
 
 function getCountdown(dateStr: string) {
   const diff = new Date(dateStr).getTime() - Date.now();
-  if (diff <= 0) return { label: "En cours", urgent: true };
+  if (diff <= 0) return { label: "In Progress", urgent: true };
   const days  = Math.floor(diff / 86400000);
   const hours = Math.floor((diff % 86400000) / 3600000);
   if (days === 0 && hours === 0) return { label: "<1h", urgent: true };
   if (days === 0) return { label: `${hours}h`, urgent: true };
-  return { label: `J-${days}`, urgent: false };
+  return { label: `D-${days}`, urgent: false };
 }
 
 // ─── Match Card ───────────────────────────────────────────────────────────────
@@ -187,7 +187,7 @@ export default function UpcomingMatchesInner({ matches, followedTeams }: Upcomin
     return (
       <div className="rounded-xl border border-zinc-800/60 bg-zinc-950 p-8 flex flex-col items-center gap-3 text-center">
         <div className="w-12 h-12 rounded-full bg-zinc-900 flex items-center justify-center text-2xl">📅</div>
-        <p className="text-zinc-600 text-sm">Aucun match à venir</p>
+        <p className="text-zinc-600 text-sm">no upcoming match</p>
       </div>
     );
   }
@@ -235,7 +235,7 @@ export default function UpcomingMatchesInner({ matches, followedTeams }: Upcomin
           transition={{ duration: 0.15 }}>
           {filtered.length === 0 ? (
             <div className="rounded-xl border border-zinc-800/60 bg-zinc-950 p-6 text-center text-zinc-600 text-sm">
-              Aucun match à venir pour cette équipe
+              no upcoming match for this team
             </div>
           ) : (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">

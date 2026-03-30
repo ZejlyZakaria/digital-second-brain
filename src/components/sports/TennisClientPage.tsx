@@ -21,7 +21,7 @@ export default function TennisClientPage({ userId, favoritePlayerIds }: TennisCl
         variant="outline"
         className="border-emerald-500/20 text-emerald-400 hover:bg-emerald-500/10 hover:text-emerald-300 gap-2"
       >
-        + Ajouter un joueur
+        + Add a player
       </Button>
 
       <TennisPlayerSearchModal

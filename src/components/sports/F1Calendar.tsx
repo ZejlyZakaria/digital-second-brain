@@ -58,7 +58,7 @@ export default function F1Calendar({ races }: { races: CalendarRace[] }) {
       <div className="flex items-center gap-3">
         <div className="h-1 w-12 rounded-full bg-linear-to-r from-red-600 to-red-400" />
         <h2 className="text-xs font-bold uppercase tracking-widest text-zinc-500">
-          Prochaine Courses
+          Next Races
         </h2>
         <div className="flex-1 h-px bg-zinc-800" />
       </div>
@@ -128,7 +128,7 @@ export default function F1Calendar({ races }: { races: CalendarRace[] }) {
                     <div className="flex items-center gap-1.5">
                       <Calendar size={11} className="text-amber-500" />
                       <span className="text-[11px] sm:text-xs font-light tracking-[.12rem] text-amber-500">
-                        Dans {daysUntil}j
+                        In {daysUntil} days
                       </span>
                     </div>
                   </div>

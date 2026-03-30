@@ -56,7 +56,7 @@ function getCompetitionLogo(name: string) {
 }
 
 function formatDate(date: string) {
-  return new Date(date).toLocaleDateString("fr-FR", { day: "numeric", month: "long" });
+  return new Date(date).toLocaleDateString("en-US", { day: "numeric", month: "long" });
 }
 
 // ─── Progress Bars ────────────────────────────────────────────────────────────
@@ -101,7 +101,7 @@ function EmptyHero({ onAdd }: { onAdd: () => void }) {
           onClick={onAdd}
           className="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-white/10 border border-white/20 backdrop-blur-sm text-white font-semibold text-sm cursor-pointer">
           <Plus size={16} />
-          Ajouter une équipe
+          Add a team
         </motion.div>
       </div>
     </div>
@@ -179,7 +179,7 @@ export default function HeroSwiper({ teamHeroes, userId, favoriteTeamIds }: Hero
         {/* label équipes favorites */}
         <div className="absolute top-4 left-4 z-30">
           <span className="text-white/60 text-[10px] font-bold uppercase tracking-widest">
-            Équipes favorites
+            Favorite Teams
           </span>
         </div>
 
@@ -188,7 +188,7 @@ export default function HeroSwiper({ teamHeroes, userId, favoriteTeamIds }: Hero
           <Button size="sm" variant="outline" onClick={() => setAddModalOpen(true)}
             className="bg-black/40 border-white/15 text-white/80 backdrop-blur-sm hover:bg-black/60 hover:text-white hover:border-white/30 text-xs gap-1.5">
             <Plus size={12} />
-            Ajouter une équipe
+            Add a team
           </Button>
         </div>
 
@@ -250,7 +250,7 @@ export default function HeroSwiper({ teamHeroes, userId, favoriteTeamIds }: Hero
                       <motion.span initial={{ opacity: 0, y: -8 }} animate={{ opacity: 1, y: 0 }}
                         transition={{ delay: 0.25, duration: 0.35 }}
                         className="text-xs font-bold text-emerald-300 tracking-widest">
-                        ÉQUIPE PRINCIPALE
+                        MAIN TEAM
                       </motion.span>
                     )}
                     <motion.h2 initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }}
@@ -270,7 +270,7 @@ export default function HeroSwiper({ teamHeroes, userId, favoriteTeamIds }: Hero
                       <div className="flex items-center gap-4">
                         <div className="order-2 md:order-1">
                           <p className="text-sm uppercase tracking-wider text-emerald-300 font-semibold">
-                            Prochain Match
+                            Next Match
                           </p>
                           <p className="text-base md:text-lg font-bold text-white">
                             {nextMatch.home_team_name} vs {nextMatch.away_team_name}
@@ -294,7 +294,7 @@ export default function HeroSwiper({ teamHeroes, userId, favoriteTeamIds }: Hero
                       transition={{ delay: 0.4, duration: 0.4 }}
                       className="flex items-center gap-3 text-zinc-400">
                       <ShieldAlert size={20} />
-                      <p>Aucun match à venir</p>
+                      <p>No upcoming match</p>
                     </motion.div>
                   )}
                 </div>

@@ -30,7 +30,7 @@ export const WATCHING_CONFIGS: Record<MediaType, WatchingConfig> = {
   serie: {
     type: "serie",
     label: "série",
-    labelPlural: "séries",
+    labelPlural: "series",
     tmdbSearchType: "tv",
     tmdbTrendingEndpoint: "trending/tv/week",
     tmdbNowEndpoint: "tv/on_the_air",

@@ -30,9 +30,9 @@ export default function TopTenSectionClient({
     unregisterOnAdded,
     registerOnUpdated,
     unregisterOnUpdated,
-    registerOnDeleted,      // ✅ AJOUTÉ
-    unregisterOnDeleted,    // ✅ AJOUTÉ
-    notifyDeleted,          // ✅ AJOUTÉ
+    registerOnDeleted,      
+    unregisterOnDeleted,    
+    notifyDeleted,          
   } = useWatching();
   const supabase = createClient();
 
@@ -64,7 +64,6 @@ export default function TopTenSectionClient({
       });
     });
 
-    // ✅ AJOUTÉ : Écouter les suppressions des autres sections
     registerOnDeleted("topTen", (itemId: string) => {
       setItems((prev) => prev.filter((i) => i.id !== itemId));
     });
@@ -72,15 +71,15 @@ export default function TopTenSectionClient({
     return () => {
       unregisterOnAdded("topTen");
       unregisterOnUpdated("topTen");
-      unregisterOnDeleted("topTen");  // ✅ AJOUTÉ
+      unregisterOnDeleted("topTen");  
     };
   }, [
     registerOnAdded,
     unregisterOnAdded,
     registerOnUpdated,
     unregisterOnUpdated,
-    registerOnDeleted,      // ✅ AJOUTÉ
-    unregisterOnDeleted,    // ✅ AJOUTÉ
+    registerOnDeleted,      
+    unregisterOnDeleted,    
   ]);
 
   const handleReorder = useCallback((reordered: WatchItem[]) => {
@@ -102,9 +101,9 @@ export default function TopTenSectionClient({
         ),
       );
       setIsDirty(false);
-      toast.success("Classement sauvegardé !");
+      toast.success("Ranking saved !");
     } catch {
-      toast.error("Erreur lors de la sauvegarde.");
+      toast.error("Error occurred while saving the ranking.");
     } finally {
       setSaving(false);
     }
@@ -119,10 +118,10 @@ export default function TopTenSectionClient({
         .eq("id", itemId)
         .eq("user_id", userId);
       setItems((prev) => prev.filter((i) => i.id !== itemId));
-      notifyDeleted(itemId);  // ✅ AJOUTÉ : Notifier toutes les sections
-      toast.success("Supprimé du Top 10.");
+      notifyDeleted(itemId); 
+      toast.success("Deleted from Top 10.");
     } catch {
-      toast.error("Erreur lors de la suppression.");
+      toast.error("Error occurred while deleting the item.");
     }
   };
 
@@ -132,9 +131,9 @@ export default function TopTenSectionClient({
 
   const label =
     config.labelPlural === "films"
-      ? "de Tous les Temps"
-      : config.labelPlural === "séries"
-        ? "Séries"
+      ? "of all time"
+      : config.labelPlural === "series"
+        ? "Series"
         : "Animes";
 
   return (
@@ -152,8 +151,8 @@ export default function TopTenSectionClient({
         </div>
       )}
       <MediaCarousel
-        title={`Mon Top 10 ${label}`}
-        subtitle={`Tes 10 ${config.labelPlural} incontournables`}
+        title={`My Top 10 ${label}`}
+        subtitle={`Your 10 ${config.labelPlural} incontournables`}
         items={items}
         onAddClick={items.length < 10 ? () => openModal("topTen") : undefined}
         draggable

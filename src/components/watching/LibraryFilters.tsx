@@ -24,18 +24,18 @@ interface Props {
 // ─── config ───────────────────────────────────────────────────────────────────
 
 const MEDIA_TYPES: { value: MediaType; label: string }[] = [
-  { value: "all",   label: "Tout" },
+  { value: "all",   label: "All" },
   { value: "film",  label: "Films" },
-  { value: "serie", label: "Séries" },
+  { value: "serie", label: "Series" },
   { value: "anime", label: "Animes" },
 ];
 
 const SORT_OPTIONS: { value: SortKey; label: string }[] = [
-  { value: "added",    label: "Date d'ajout" },
-  { value: "rating",   label: "Note" },
-  { value: "title",    label: "Titre" },
-  { value: "year",     label: "Année" },
-  { value: "favorite", label: "Favoris" },
+  { value: "added",    label: "Date added" },
+  { value: "rating",   label: "Rating" },
+  { value: "title",    label: "Title" },
+  { value: "year",     label: "Year" },
+  { value: "favorite", label: "Favorite" },
 ];
 
 // ─── main ─────────────────────────────────────────────────────────────────────

@@ -44,7 +44,7 @@ export default async function F1HeroSection({}: { userId: string }) {
   if (!nextRace) {
     return (
       <div className="p-8 text-zinc-500 text-center">
-        Aucune course à venir pour le moment.
+        No race is scheduled for the moment.
       </div>
     );
   }

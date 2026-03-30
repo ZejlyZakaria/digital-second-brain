@@ -4,7 +4,7 @@ import { useState } from "react";
 import Image from "next/image";
 import { motion, AnimatePresence } from "framer-motion";
 import { Calendar } from "lucide-react";
-import { displayCompetition, formatMatchDate } from "@/lib/utils/football-helpers";
+import { displayCompetition } from "@/lib/utils/football-helpers";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -52,27 +52,37 @@ function getResult(match: PastMatch): Result {
 
 const RESULT_CONFIG = {
   W: {
-    label: "V",
+    label: "W",
     pill: "bg-emerald-500/15 border-emerald-500/30 text-emerald-400",
     accent: "via-emerald-500/30",
     glow: "rgba(52,211,153,0.06)",
     scoreColor: "text-emerald-400",
   },
   D: {
-    label: "N",
+    label: "D",
     pill: "bg-zinc-700/40 border-zinc-600/30 text-zinc-400",
     accent: "via-zinc-500/20",
     glow: "rgba(113,113,122,0.04)",
     scoreColor: "text-zinc-300",
   },
   L: {
-    label: "D",
+    label: "L",
     pill: "bg-red-500/15 border-red-500/30 text-red-400",
     accent: "via-red-500/25",
     glow: "rgba(239,68,68,0.06)",
     scoreColor: "text-red-400",
   },
 };
+
+// ─── Format Date ──────────────────────────────────────────────────────────────
+
+function formatMatchDate(date: string) {
+  return new Date(date).toLocaleDateString("en-US", { 
+    day: "numeric", 
+    month: "short", 
+    year: "numeric" 
+  });
+}
 
 // ─── Result Card ──────────────────────────────────────────────────────────────
 
@@ -186,7 +196,7 @@ function FormStrip({ matches, followedTeamId }: { matches: PastMatch[]; followed
   if (!teamMatches.length) return null;
   return (
     <div className="flex items-center gap-1.5">
-      <span className="text-zinc-600 text-[10px] font-semibold uppercase tracking-widest">Forme</span>
+      <span className="text-zinc-600 text-[10px] font-semibold uppercase tracking-widest">Form</span>
       <div className="flex gap-1">
         {teamMatches.map((m, i) => {
           const r = getResult(m);
@@ -218,7 +228,7 @@ export default function RecentResultsInner({ matches, followedTeams }: RecentRes
     return (
       <div className="rounded-xl border border-zinc-800/60 bg-zinc-950 p-8 flex flex-col items-center gap-3 text-center">
         <div className="w-12 h-12 rounded-full bg-zinc-900 flex items-center justify-center text-2xl">📋</div>
-        <p className="text-zinc-600 text-sm">Aucun résultat récent</p>
+        <p className="text-zinc-600 text-sm">No recent results</p>
       </div>
     );
   }
@@ -269,7 +279,7 @@ export default function RecentResultsInner({ matches, followedTeams }: RecentRes
           transition={{ duration: 0.15 }}>
           {filtered.length === 0 ? (
             <div className="rounded-xl border border-zinc-800/60 bg-zinc-950 p-6 text-center text-zinc-600 text-sm">
-              Aucun résultat récent pour cette équipe
+              No recent results for this team
             </div>
           ) : (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">

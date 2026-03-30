@@ -492,7 +492,7 @@ export default function BestXI({
                 : "bg-emerald-600 hover:bg-emerald-500 text-white shadow-lg shadow-emerald-900/30"
             }`}>
             {saving ? <Loader2 size={12} className="animate-spin" /> : <Save size={12} />}
-            {saved ? "Sauvegardé !" : "Sauvegarder"}
+            {saved ? "Saved!" : "Save"}
           </Button>
         </div>
 
@@ -500,14 +500,14 @@ export default function BestXI({
         <div className="flex items-center gap-4 text-xs">
           <div className="flex items-center gap-1.5">
             <div className="w-1.5 h-1.5 rounded-full bg-emerald-400" />
-            <span className="text-zinc-500">Titulaires</span>
+            <span className="text-zinc-500">Starters</span>
             <span className="font-black text-emerald-400">{starterCount}</span>
             <span className="text-zinc-700">/11</span>
           </div>
           <div className="w-px h-3 bg-zinc-800" />
           <div className="flex items-center gap-1.5">
             <div className="w-1.5 h-1.5 rounded-full bg-zinc-500" />
-            <span className="text-zinc-500">Remplaçants</span>
+            <span className="text-zinc-500">Substitutes</span>
             <span className="font-black text-zinc-300">{subCount}</span>
             <span className="text-zinc-700">/{SUBSTITUTES_COUNT}</span>
           </div>
@@ -552,7 +552,7 @@ export default function BestXI({
         {/* remplaçants — 15% — colonne verticale */}
         <div className="hidden md:flex flex-col items-center gap-2 py-2 overflow-y-auto" style={{ flex: "0 0 20%" }}>
           <span className="text-zinc-600 text-[8px] font-bold uppercase tracking-widest text-center mb-1">
-            Rempl.
+            Sub.
           </span>
           {Array.from({ length: SUBSTITUTES_COUNT }).map((_, i) => (
             <SubstituteSlot key={i}

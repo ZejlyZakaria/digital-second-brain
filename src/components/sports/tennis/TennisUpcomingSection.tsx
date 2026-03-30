@@ -29,7 +29,7 @@ export default async function TennisUpcomingSection({
   if (!tournament) return null;
 
   const isOngoing = tournament.start_date <= now && (!tournament.end_date || tournament.end_date >= now);
-  const sectionTitle = isOngoing ? "Tournoi en cours" : "Prochain Tournoi";
+  const sectionTitle = isOngoing ? "Tournament in Progress" : "Next Tournament";
 
   // rankings des joueurs favoris
   const rankingsMap: Record<string, number> = {};

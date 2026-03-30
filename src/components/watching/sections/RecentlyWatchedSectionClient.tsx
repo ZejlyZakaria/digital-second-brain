@@ -20,7 +20,7 @@ export default function RecentlyWatchedSectionClient({ initialItems, userId, con
   const { openModal, registerOnAdded, unregisterOnAdded,
           registerOnUpdated, unregisterOnUpdated,
           registerOnMoved, unregisterOnMoved,
-          registerOnDeleted, unregisterOnDeleted, notifyDeleted } = useWatching();  // ✅ AJOUTÉ
+          registerOnDeleted, unregisterOnDeleted, notifyDeleted } = useWatching(); 
   const supabase = createClient();
 
   useEffect(() => {
@@ -43,7 +43,6 @@ export default function RecentlyWatchedSectionClient({ initialItems, userId, con
       });
     });
 
-    // ✅ AJOUTÉ : Écouter les suppressions des autres sections
     registerOnDeleted("recentlyWatched", (itemId: string) => {
       setItems(prev => prev.filter(i => i.id !== itemId));
     });
@@ -52,18 +51,18 @@ export default function RecentlyWatchedSectionClient({ initialItems, userId, con
       unregisterOnAdded("recentlyWatched");
       unregisterOnUpdated("recentlyWatched");
       unregisterOnMoved("recentlyWatched");
-      unregisterOnDeleted("recentlyWatched");  // ✅ AJOUTÉ
+      unregisterOnDeleted("recentlyWatched");  
     };
   }, [registerOnAdded, unregisterOnAdded, registerOnUpdated, unregisterOnUpdated,
       registerOnMoved, unregisterOnMoved,
-      registerOnDeleted, unregisterOnDeleted]);  // ✅ AJOUTÉ
+      registerOnDeleted, unregisterOnDeleted]);  
 
   const handleDelete = async (itemId: string) => {
     try {
       await supabase.schema("watching").from("media_items")
         .delete().eq("id", itemId).eq("user_id", userId);
       setItems(prev => prev.filter(i => i.id !== itemId));
-      notifyDeleted(itemId);  // ✅ AJOUTÉ : Notifier toutes les sections
+      notifyDeleted(itemId);
       toast.success("Supprimé.");
     } catch {
       toast.error("Erreur lors de la suppression.");
@@ -76,8 +75,8 @@ export default function RecentlyWatchedSectionClient({ initialItems, userId, con
 
   return (
     <MediaCarousel
-      title="Vu Récemment"
-      subtitle={`Tes 10 derniers ${config.labelPlural} regardés`}
+      title="Recently Watched"
+      subtitle={`Your 10 most recently watched ${config.labelPlural}`}
       items={items}
       onAddClick={() => openModal("recentlyWatched")}
       onDelete={handleDelete}

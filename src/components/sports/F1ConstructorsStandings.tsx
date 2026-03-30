@@ -161,7 +161,7 @@ export default function F1ConstructorsStandings({
       <div className="flex items-center gap-3">
         <div className="h-1 w-12 rounded-full bg-linear-to-r from-red-600 to-red-400" />
         <h2 className="text-xs font-bold uppercase tracking-widest text-zinc-500">
-          Classement Constructeurs
+          Constructor Standings
         </h2>
         <div className="flex-1 h-px bg-zinc-800" />
       </div>
@@ -180,7 +180,7 @@ export default function F1ConstructorsStandings({
                 </th>
                 <th className="px-2 py-2.5 text-left">
                   <span className="text-[11px] font-semibold text-zinc-600 uppercase tracking-widest">
-                    Équipe
+                    Team
                   </span>
                 </th>
                 <th className="px-1 py-2.5 text-left">
@@ -190,7 +190,7 @@ export default function F1ConstructorsStandings({
                 </th>
                 <th className="px-2 py-2.5 text-center w-12 hidden sm:table-cell">
                   <span className="mr-2 text-[11px] font-semibold text-zinc-600 uppercase tracking-widest">
-                    V
+                    W
                   </span>
                 </th>
                 <th className="px-2 py-2.5 text-center w-12 hidden md:table-cell">

@@ -54,7 +54,7 @@ export default function WantToWatchSectionClient({ initialItems, userId, config 
         .schema("watching").from("media_items")
         .update({ 
           watched: true, 
-          recently_watched: true,  // ✅ CORRECTION : Passe à Vu Récemment
+          recently_watched: true,
           want_to_watch: false, 
           watched_at: new Date().toISOString() 
         })
@@ -87,8 +87,8 @@ export default function WantToWatchSectionClient({ initialItems, userId, config 
 
   return (
     <MediaCarousel
-      title="À Voir"
-      subtitle={`Ta watchlist — jusqu'à 20 ${config.labelPlural}`}
+      title="Want to Watch"
+      subtitle={`Your watchlist — up to 20 ${config.labelPlural}`}
       items={items}
       onAddClick={items.length < 20 ? () => openModal("wantToWatch") : undefined}
       onMarkWatched={handleMarkWatched}

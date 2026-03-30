@@ -63,7 +63,7 @@ export default async function FootballRecentResults({
     <section>
       <div className="flex items-center gap-3 mb-4">
         <div className="h-1 w-12 rounded-full bg-linear-to-r from-emerald-500 to-emerald-300" />
-        <h2 className="text-xs font-bold uppercase tracking-widest text-zinc-500">Résultats récents</h2>
+        <h2 className="text-xs font-bold uppercase tracking-widest text-zinc-500">Recent Results</h2>
         <div className="flex-1 h-px bg-zinc-800" />
       </div>
       <RecentResults matches={pastMatches} followedTeams={followedTeamResults} />

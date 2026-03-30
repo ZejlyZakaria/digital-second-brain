@@ -122,7 +122,7 @@ function EmptyHero({ onAdd }: { onAdd: () => void }) {
       <div className="absolute inset-0 bg-linear-to-t from-black/80 via-black/40 to-transparent" />
       <div className="absolute top-4 left-4 z-10">
         <span className="text-zinc-400 text-xs font-bold uppercase tracking-widest">
-          Joueurs favoris
+          Favorite players
         </span>
       </div>
       <div className="absolute inset-0 flex items-center justify-center z-10">
@@ -133,7 +133,7 @@ function EmptyHero({ onAdd }: { onAdd: () => void }) {
           className="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-white/10 border border-white/20 backdrop-blur-sm text-white font-semibold text-sm cursor-pointer"
         >
           <Plus size={16} />
-          Ajouter un joueur
+          Add a player
         </motion.div>
       </div>
     </div>
@@ -251,7 +251,7 @@ export default function TennisHeroSwiper({
         {/* label joueurs favoris */}
         <div className="absolute top-4 left-4 z-10">
           <span className="text-white/60 text-[10px] font-bold uppercase tracking-widest">
-            Joueurs favoris
+            Favorite players
           </span>
         </div>
 
@@ -264,7 +264,7 @@ export default function TennisHeroSwiper({
             className="bg-black/40 border-white/15 text-white/80 backdrop-blur-sm hover:bg-black/60 hover:text-white hover:border-white/30 text-xs gap-1.5"
           >
             <Plus size={12} />
-            Ajouter un joueur
+            Add a player
           </Button>
         </div>
 
@@ -356,7 +356,7 @@ export default function TennisHeroSwiper({
                         transition={{ delay: 0.25, duration: 0.35 }}
                         className="text-xs font-bold text-amber-300 tracking-widest"
                       >
-                        JOUEUR PRINCIPAL
+                        MAIN PLAYER
                       </motion.span>
                     )}
                     <motion.h2
@@ -399,7 +399,7 @@ export default function TennisHeroSwiper({
                     className="flex flex-col items-center md:items-end text-center md:text-right gap-1.5"
                   >
                     <p className="text-xs font-bold uppercase tracking-wider text-amber-300">
-                      Prochain match
+                      Next match
                     </p>
                     <p className="text-base md:text-lg font-bold text-white">
                       vs {nextMatch.opponent_name ?? "TBD"}
@@ -427,7 +427,7 @@ export default function TennisHeroSwiper({
                     className="text-zinc-500 text-sm flex items-center gap-2"
                   >
                     <Calendar size={14} />
-                    Aucun match à venir
+                    No upcoming matches
                   </motion.div>
                 )}
               </div>

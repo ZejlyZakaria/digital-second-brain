@@ -28,9 +28,9 @@ export default function InProgressSectionClient({
     registerOnUpdated,
     unregisterOnUpdated,
     notifyMoved,
-    registerOnDeleted,      // ✅ AJOUTÉ
-    unregisterOnDeleted,    // ✅ AJOUTÉ
-    notifyDeleted,          // ✅ AJOUTÉ
+    registerOnDeleted,      
+    unregisterOnDeleted,    
+    notifyDeleted,          
   } = useWatching();
   const supabase = createClient();
 
@@ -45,7 +45,7 @@ export default function InProgressSectionClient({
       setItems((prev) => prev.map((i) => (i.id === item.id ? item : i)));
     });
 
-    // ✅ AJOUTÉ : Écouter les suppressions des autres sections (ex: Top 10)
+    // Écouter les suppressions des autres sections (ex: Top 10)
     registerOnDeleted("inProgress", (itemId: string) => {
       setItems((prev) => prev.filter((i) => i.id !== itemId));
     });
@@ -53,15 +53,15 @@ export default function InProgressSectionClient({
     return () => {
       unregisterOnAdded("inProgress");
       unregisterOnUpdated("inProgress");
-      unregisterOnDeleted("inProgress");  // ✅ AJOUTÉ
+      unregisterOnDeleted("inProgress");  
     };
   }, [
     registerOnAdded,
     unregisterOnAdded,
     registerOnUpdated,
     unregisterOnUpdated,
-    registerOnDeleted,      // ✅ AJOUTÉ
-    unregisterOnDeleted,    // ✅ AJOUTÉ
+    registerOnDeleted,      
+    unregisterOnDeleted,    
   ]);
 
   const handleMarkWatched = async (itemId: string) => {
@@ -83,9 +83,9 @@ export default function InProgressSectionClient({
       if (error) throw error;
       setItems((prev) => prev.filter((i) => i.id !== itemId));
       notifyMoved("inProgress", updated);
-      toast.success("Marqué comme terminé !");
+      toast.success("Marked as finished !");
     } catch {
-      toast.error("Erreur lors de la mise à jour.");
+      toast.error("Error occurred while updating the item.");
     }
   };
 
@@ -94,15 +94,15 @@ export default function InProgressSectionClient({
       await supabase
         .schema("watching")
         .from("media_items")
-        .delete()  // ✅ CHANGÉ : Suppression complète au lieu de juste retirer de En cours
+        .delete()  
         .eq("id", itemId)
         .eq("user_id", userId);
       
       setItems((prev) => prev.filter((i) => i.id !== itemId));
-      notifyDeleted(itemId);  // ✅ AJOUTÉ : Notifier toutes les sections
-      toast.success("Supprimé.");
+      notifyDeleted(itemId);   
+      toast.success("Deleted.");
     } catch {
-      toast.error("Erreur lors de la suppression.");
+      toast.error("Error occurred while deleting the item.");
     }
   };
 
@@ -110,12 +110,12 @@ export default function InProgressSectionClient({
     setItems((prev) => prev.map((i) => (i.id === updated.id ? updated : i)));
   };
 
-  const label = config.labelPlural === "séries" ? "Séries" : "Animes";
+  const label = config.labelPlural === "series" ? "Series" : "Animes";
 
   return (
     <MediaCarousel
-      title="En Cours"
-      subtitle={`${label} que tu regardes actuellement`}
+      title="In Progress"
+      subtitle={`${label} that you are currently watching`}
       items={items}
       onAddClick={() => openModal("inProgress")}
       onMarkWatched={handleMarkWatched}

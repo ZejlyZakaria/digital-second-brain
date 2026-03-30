@@ -16,7 +16,7 @@ export interface TennisPastMatch {
   score: string;
   result: "W" | "L";
   round: string | null;
-  tournament_name?: string | null; // ✅ NOUVEAU
+  tournament_name?: string | null; 
 }
 
 export interface FollowedPlayer {
@@ -41,7 +41,7 @@ interface ParsedSet {
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
 function formatMatchDate(dateStr: string) {
-  return new Date(dateStr).toLocaleDateString("fr-FR", {
+  return new Date(dateStr).toLocaleDateString("en-US", {
     day: "numeric",
     month: "short",
     year: "numeric",
@@ -54,19 +54,29 @@ function formatRound(round: string | null): string {
 
   const r = round.toUpperCase().trim();
 
-  // Finales
-  if (r === "F" || r === "FINAL") return "Finale";
-  if (r === "SF" || r === "SEMI-FINAL") return "Demi-finale";
-  if (r === "QF" || r === "QUARTER-FINAL") return "Quart de finale";
+  // Finals
+  if (r === "F" || r === "FINAL") return "Final";
+  if (r === "SF" || r === "SEMI-FINAL") return "Semi-Final";
+  if (r === "QF" || r === "QUARTER-FINAL") return "Quarter-Final";
 
-  // Rounds numérotés
+  // Numbered rounds
   const match = r.match(/(\d+)R/i);
   if (match) {
-    const num = match[1];
-    return `${num}${num === "1" ? "er" : "e"} Tour`;
+    const num = parseInt(match[1]);
+    return `${num}${getOrdinalSuffix(num)} Round`;
   }
 
   return round;
+}
+
+function getOrdinalSuffix(num: number): string {
+  const j = num % 10;
+  const k = num % 100;
+  
+  if (j === 1 && k !== 11) return "st";
+  if (j === 2 && k !== 12) return "nd";
+  if (j === 3 && k !== 13) return "rd";
+  return "th";
 }
 
 // ✅ Parser scores avec tie-breaks
@@ -150,14 +160,14 @@ function parseScore(score: string): ParsedSet[] {
 
 const RESULT_CONFIG = {
   W: {
-    label: "V",
+    label: "W",
     pill: "bg-emerald-500/15 border-emerald-500/30 text-emerald-400",
     accent: "via-emerald-500/30",
     glow: "rgba(52,211,153,0.06)",
     scoreColor: "text-emerald-400",
   },
   L: {
-    label: "D",
+    label: "L",
     pill: "bg-red-500/15 border-red-500/30 text-red-400",
     accent: "via-red-500/25",
     glow: "rgba(239,68,68,0.06)",
@@ -320,7 +330,7 @@ function FormStrip({
   return (
     <div className="flex items-center gap-1.5">
       <span className="text-zinc-600 text-[10px] font-semibold uppercase tracking-widest">
-        Forme
+        Form
       </span>
       <div className="flex gap-1">
         {playerMatches.map((m, i) => {
@@ -365,7 +375,7 @@ export default function TennisRecentResultsInner({
     return (
       <div className="rounded-xl border border-zinc-800/60 bg-zinc-950 p-8 flex flex-col items-center gap-3 text-center">
         <div className="text-2xl">🎾</div>
-        <p className="text-zinc-600 text-sm">Aucun résultat récent</p>
+        <p className="text-zinc-600 text-sm">No recent results</p>
       </div>
     );
   }
@@ -450,7 +460,7 @@ export default function TennisRecentResultsInner({
         >
           {filtered.length === 0 ? (
             <div className="rounded-xl border border-zinc-800/60 bg-zinc-950 p-6 text-center text-zinc-600 text-sm">
-              Aucun résultat récent pour ce joueur
+              No recent results for this player
             </div>
           ) : (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">

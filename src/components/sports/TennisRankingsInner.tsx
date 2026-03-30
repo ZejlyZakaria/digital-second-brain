@@ -54,10 +54,10 @@ export default function TennisRankingsInner({
           #
         </span>
         <span className="text-zinc-600 text-[10px] font-bold uppercase tracking-widest">
-          Joueur
+          Players
         </span>
         <span className="mr-3 text-zinc-600 text-[10px] font-bold uppercase tracking-widest text-right">
-          Pays
+          Countries
         </span>
         <span className="mr-2 text-zinc-600 text-[10px] font-bold uppercase tracking-widest text-right">
           Points

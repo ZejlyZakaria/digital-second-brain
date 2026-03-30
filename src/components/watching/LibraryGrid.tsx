@@ -20,7 +20,7 @@ export default function LibraryGrid({
     <div>
       <div className="mb-6 flex items-center justify-between">
         <p className="text-sm text-zinc-500">
-          {items.length} média{items.length > 1 ? "s" : ""}
+          {items.length} media{items.length > 1 ? "s" : ""}
         </p>
       </div>
 
@@ -56,7 +56,7 @@ export default function LibraryGrid({
 
       {items.length === 0 && (
         <div className="flex flex-col items-center justify-center py-20 text-center">
-          <p className="text-zinc-500">Aucun média trouvé</p>
+          <p className="text-zinc-500">No media found</p>
         </div>
       )}
     </div>

@@ -35,7 +35,7 @@ interface RecentResult {
 
 function formatRaceDate(dateStr: string): string {
   const date = new Date(dateStr);
-  return date.toLocaleDateString("fr-FR", {
+  return date.toLocaleDateString("en-US", {
     day: "numeric",
     month: "long",
     year: "numeric",
@@ -53,7 +53,7 @@ export default function F1RecentResults({
       <div className="flex items-center gap-3">
         <div className="h-1 w-12 rounded-full bg-linear-to-r from-red-600 to-red-400" />
         <h2 className="text-xs font-bold uppercase tracking-widest text-zinc-500">
-          Derniers Résultats
+          Recent Results
         </h2>
         <div className="flex-1 h-px bg-zinc-800" />
       </div>
@@ -92,22 +92,6 @@ export default function F1RecentResults({
               />
 
               {/* Logo équipe P1 en watermark */}
-              {/* {result.podium.p1.team_logo && (
-                <div
-                  className="pointer-events-none absolute inset-0 flex items-center justify-center"
-                  style={{ opacity: 0.05 }}
-                >
-                  <img
-                    src={result.podium.p1.team_logo}
-                    alt=""
-                    className="h-48 w-48 object-contain"
-                    style={{
-                      filter: "brightness(0) invert(1)",
-                      opacity: 0.5,
-                    }}
-                  />
-                </div>
-              )} */}
               {result.podium.p1.team_logo && (
                 <div
                   className="pointer-events-none absolute inset-0 flex items-center justify-center"

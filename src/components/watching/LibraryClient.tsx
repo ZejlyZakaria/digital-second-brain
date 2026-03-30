@@ -114,9 +114,9 @@ export default function LibraryClient({ initialItems }: Props) {
       {/* header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-xl font-bold text-white">Ma Bibliothèque</h1>
+          <h1 className="text-xl font-bold text-white">My Library</h1>
           <p className="text-sm text-zinc-500 mt-0.5">
-            {totalCount} média{totalCount > 1 ? "s" : ""}
+            {totalCount} media{totalCount > 1 ? "s" : ""}
           </p>
         </div>
 
@@ -126,7 +126,7 @@ export default function LibraryClient({ initialItems }: Props) {
             <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-500" />
             <input
               type="text"
-              placeholder="Rechercher un titre, un genre..."
+              placeholder="Search for a title, or genre..."
               value={search}
               onChange={e => { setSearch(e.target.value); setCurrentPage(1); }}
               className="w-full bg-zinc-900/80 border border-zinc-800 rounded-xl pl-9 pr-9 py-2 text-sm text-white placeholder:text-zinc-600 outline-none focus:border-zinc-600 focus:ring-1 focus:ring-zinc-600/20 transition-all"
@@ -147,7 +147,7 @@ export default function LibraryClient({ initialItems }: Props) {
             className="gap-2 bg-violet-600 hover:bg-violet-500 text-white shrink-0"
           >
             <Plus size={15} />
-            Ajouter
+            Add
           </Button>
         </div>
       </div>
@@ -208,7 +208,7 @@ function Pagination({ currentPage, totalPages, onChange }: {
         disabled={currentPage === 1}
         className="px-3 py-1.5 text-sm rounded-lg bg-zinc-900 border border-zinc-800 text-zinc-400 hover:text-white hover:border-zinc-600 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
       >
-        Précédent
+        Previous
       </button>
 
       {pages.map((page, i) =>
@@ -234,7 +234,7 @@ function Pagination({ currentPage, totalPages, onChange }: {
         disabled={currentPage === totalPages}
         className="px-3 py-1.5 text-sm rounded-lg bg-zinc-900 border border-zinc-800 text-zinc-400 hover:text-white hover:border-zinc-600 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
       >
-        Suivant
+        Next
       </button>
     </div>
   );

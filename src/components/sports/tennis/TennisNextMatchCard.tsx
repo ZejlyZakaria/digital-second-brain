@@ -79,7 +79,7 @@ export default function TennisNextMatchCard({
         <CourtLines color={SURFACE_CONFIGS.unknown.lines} />
         <div className="absolute inset-0 bg-linear-to-t from-black/80 via-black/40 to-transparent" />
         <p className="relative z-10 text-zinc-500 text-xs text-center italic">
-          Aucun match à venir
+          No upcoming matches
         </p>
       </div>
     );
