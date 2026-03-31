@@ -20,7 +20,6 @@ import { useStatuses } from "@/lib/tasks/queries/useStatuses";
 import { useWorkspaces } from "@/lib/tasks/queries/useWorkspaces";
 import { useProjects } from "@/lib/tasks/queries/useProjects";
 import type { Task } from "@/lib/tasks/types/tasks.types";
-import { TasksEmptyState } from "../TasksEmptyState";
 import { TasksSkeleton } from "../TasksSkeletons";
 
 // =====================================================
@@ -141,19 +140,8 @@ export function KanbanBoard() {
   // RENDER STATES
   // =====================================================
 
-  // Still resolving — wait before deciding to show onboarding or board
-  // (hasProjects && !selectedProjectId) = sidebar is about to auto-select, hold on
-  if (workspacesLoading || projectsLoading || (hasProjects && !selectedProjectId)) {
-    return <TasksSkeleton />;
-  }
-
-  // Confirmed: no projects → onboarding
-  if (!hasProjects) {
-    return <TasksEmptyState />;
-  }
-
-  // Tasks/statuses loading (project is selected)
-  if (statusesLoading || tasksLoading) {
+  // Loading — workspaces/projects resolving or sidebar about to auto-select
+  if (workspacesLoading || projectsLoading || (hasProjects && !selectedProjectId) || statusesLoading || tasksLoading) {
     return <TasksSkeleton />;
   }
 

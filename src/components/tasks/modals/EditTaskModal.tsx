@@ -1,7 +1,7 @@
 /* eslint-disable react-hooks/exhaustive-deps */
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
@@ -90,6 +90,17 @@ export function EditTaskModal({
   const updateTaskMutation = useUpdateTask();
   const { data: statuses } = useStatuses(task.project_id);
 
+  // Track last saved values to avoid duplicate/unnecessary saves
+  // due_date is normalized via toISOString() to match autoSave's computed value
+  const lastSaved = useRef({
+    title: task.title,
+    description: task.description ?? null,
+    priority: task.priority,
+    due_date: task.due_date ? new Date(task.due_date).toISOString() : null,
+    status_id: task.status_id,
+    estimated_hours: task.estimated_hours ?? null,
+  });
+
   const form = useForm<EditTaskFormData>({
     resolver: zodResolver(editTaskSchema),
     mode: "all",
@@ -103,7 +114,7 @@ export function EditTaskModal({
     },
   });
 
-  // Reset form when modal opens with new task data
+  // Reset form + lastSaved ref when modal opens with new task data
   useEffect(() => {
     if (open) {
       form.reset({
@@ -114,29 +125,53 @@ export function EditTaskModal({
         status_id: task.status_id,
         estimated_hours: task.estimated_hours || null,
       });
+      lastSaved.current = {
+        title: task.title,
+        description: task.description ?? null,
+        priority: task.priority,
+        due_date: task.due_date ? new Date(task.due_date).toISOString() : null,
+        status_id: task.status_id,
+        estimated_hours: task.estimated_hours ?? null,
+      };
     }
   }, [open, task.id]); // Only depend on open and task.id to avoid infinite loops
 
-  // Auto-save function
+  // Auto-save — only fires if values actually changed since last save
   const autoSave = async () => {
-    // Validate before saving
     const isValid = await form.trigger();
     if (!isValid) return;
 
     const values = form.getValues();
+    const title = values.title.trim();
+    const description = values.description?.trim() || null;
+    const priority = values.priority as Priority;
+    const due_date = values.due_date ? values.due_date.toISOString() : null;
+    const status_id = values.status_id;
+    const estimated_hours = values.estimated_hours || null;
 
-    const taskUpdate: UpdateTaskInput = {
+    const hasChanges =
+      title !== lastSaved.current.title ||
+      description !== lastSaved.current.description ||
+      priority !== lastSaved.current.priority ||
+      due_date !== lastSaved.current.due_date ||
+      status_id !== lastSaved.current.status_id ||
+      estimated_hours !== lastSaved.current.estimated_hours;
+
+    if (!hasChanges) return;
+
+    // Update ref before mutating so re-entrant calls don't double-save
+    lastSaved.current = { title, description, priority, due_date, status_id, estimated_hours };
+
+    updateTaskMutation.mutate({
       id: task.id,
       project_id: task.project_id,
-      title: values.title.trim(),
-      description: values.description?.trim() || null,
-      priority: values.priority as Priority,
-      due_date: values.due_date ? values.due_date.toISOString() : null,
-      status_id: values.status_id,
-      estimated_hours: values.estimated_hours || null,
-    };
-
-    updateTaskMutation.mutate(taskUpdate);
+      title,
+      description,
+      priority,
+      due_date,
+      status_id,
+      estimated_hours,
+    });
   };
 
   // Handle modal close
@@ -228,7 +263,6 @@ export function EditTaskModal({
                       {...field}
                       variant="tasks"
                       placeholder="Task title..."
-                      onBlur={() => autoSave()}
                       autoComplete="off"
                     />
                   </FormControl>
@@ -252,7 +286,6 @@ export function EditTaskModal({
                       variant="tasks"
                       placeholder="Add details..."
                       rows={4}
-                      onBlur={() => autoSave()}
                     />
                   </FormControl>
                   <FormMessage />
@@ -272,10 +305,7 @@ export function EditTaskModal({
                       Priority
                     </FormLabel>
                     <Select
-                      onValueChange={(value) => {
-                        field.onChange(value);
-                        setTimeout(() => autoSave(), 100);
-                      }}
+                      onValueChange={field.onChange}
                       value={field.value}
                     >
                       <FormControl>
@@ -313,10 +343,7 @@ export function EditTaskModal({
                       Status
                     </FormLabel>
                     <Select
-                      onValueChange={(value) => {
-                        field.onChange(value);
-                        setTimeout(() => autoSave(), 100);
-                      }}
+                      onValueChange={field.onChange}
                       value={field.value}
                     >
                       <FormControl>
@@ -384,7 +411,6 @@ export function EditTaskModal({
                           onSelect={(date) => {
                             field.onChange(date ?? null);
                             setIsCalendarOpen(false);
-                            setTimeout(() => autoSave(), 100);
                           }}
                           disabled={(date) =>
                             date < new Date(new Date().setHours(0, 0, 0, 0))
@@ -421,7 +447,6 @@ export function EditTaskModal({
                           const val = e.target.value;
                           field.onChange(val === "" ? null : parseFloat(val));
                         }}
-                        onBlur={() => autoSave()}
                         autoComplete="off"
                       />
                     </FormControl>
